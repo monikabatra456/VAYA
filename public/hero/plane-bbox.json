@@ -1,0 +1,20 @@
+{
+  "desktop": {
+    "x": 0.27,
+    "y": 0.52,
+    "w": 0.24,
+    "h": 0.12,
+    "centerX": 0.39,
+    "centerY": 0.58,
+    "vanishingPoint": [0.62, 0.45]
+  },
+  "mobile": {
+    "x": 0.22,
+    "y": 0.54,
+    "w": 0.46,
+    "h": 0.22,
+    "centerX": 0.45,
+    "centerY": 0.62,
+    "vanishingPoint": [0.55, 0.48]
+  }
+}
