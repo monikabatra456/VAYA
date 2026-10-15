@@ -94,9 +94,9 @@ export default function Hero() {
       return { tex, promise };
     }
 
-    // Strictly separate mobile vs desktop texture sets (Desktop textures never load on mobile!)
-    const heroSrc = isMobile ? '/hero/mobile/hero-noplane-m.webp' : '/hero/hero-noplane.webp';
-    const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.webp';
+    // Strictly use the original pastel mountain-lake image (bg.jpg) with turquoise lake & peach sky
+    const heroSrc = isMobile ? '/hero/mobile/hero-m.webp' : '/hero/bg.jpg';
+    const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.jpg';
     const depthHeroSrc = isMobile ? '/hero/mobile/depth-hero-m.webp' : '/hero/depth-hero.webp';
     const depthScene2Src = isMobile ? '/hero/mobile/depth-scene2-m.webp' : '/hero/depth-scene2.webp';
     const mistNoiseSrc = '/hero/mist-noise.webp';
@@ -203,10 +203,10 @@ export default function Hero() {
         }`}
       >
         <picture>
-          <source media="(max-width: 768px)" srcSet="/hero/mobile/hero-noplane-m.webp" />
+          <source media="(max-width: 768px)" srcSet="/hero/mobile/hero-m.webp" />
           <img
-            src="/hero/hero-noplane.webp"
-            alt="Alpine Mountain Valley"
+            src="/hero/bg.jpg"
+            alt="Pastel Alpine Mountain Valley"
             className="w-full h-full object-cover select-none"
             fetchPriority="high"
             decoding="async"
