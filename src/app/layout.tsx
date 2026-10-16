@@ -22,25 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={outfit.variable}>
       <head>
-        {/* Priority LCP Preloads: Desktop vs Mobile strictly separated */}
+        {/* Priority LCP Preload: Initial hero frame 1 */}
         <link
           rel="preload"
           as="image"
-          href="/hero/hero-noplane.webp"
-          media="(min-width: 769px)"
-          type="image/webp"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="/hero/mobile/hero-noplane-m.webp"
-          media="(max-width: 768px)"
-          type="image/webp"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="/hero/plane.webp"
+          href="/frames/frame_0001.webp"
           type="image/webp"
         />
       </head>
