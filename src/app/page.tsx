@@ -3,7 +3,6 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-import WhyVayaSection from '@/components/WhyVayaSection';
 
 export default function Home() {
   return (
@@ -11,11 +10,8 @@ export default function Home() {
       {/* Fixed Header: Logo (top-left), Login, Join Waitlist */}
       <Header />
 
-      {/* Hero Pinned Scroll Animation */}
+      {/* Hero Pinned WebGL Experience (Page ends with hero pin release) */}
       <Hero />
-
-      {/* ── Section 2: Why travellers need VAYA ── */}
-      <WhyVayaSection />
     </main>
   );
 }

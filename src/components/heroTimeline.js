@@ -8,8 +8,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
  * @param {HTMLElement} config.section - Pinned container (#hero)
  * @param {HTMLCanvasElement} config.canvas - WebGL canvas
  * @param {HTMLElement} config.plane - Plane cutout DOM element
- * @param {HTMLElement} config.title - VAYA title element
- * @param {HTMLElement} config.taglines - Taglines container
+ * @param {HTMLElement[]} config.titleLetters - Individual 'V', 'A', 'Y', 'A' letter elements
+ * @param {HTMLElement} config.tagline1 - "Know before you go" element
+ * @param {HTMLElement} config.tagline2 - "Step in, step out" element
  * @param {HTMLElement} config.scrollHint - Scroll hint indicator
  * @param {Object} config.oglCtx - OGL renderer, program, mesh
  * @param {boolean} config.isMobile - Mobile flag
@@ -19,8 +20,9 @@ export function initHeroAnimation({
   section,
   canvas,
   plane,
-  title,
-  taglines,
+  titleLetters = [],
+  tagline1,
+  tagline2,
   scrollHint,
   oglCtx,
   isMobile = false,
@@ -37,12 +39,8 @@ export function initHeroAnimation({
   let isVisible = true;
   let lastFrameTime = performance.now();
 
-  // Vanishing point constants
-  const vp = isMobile ? [0.55, 0.48] : [0.62, 0.45];
-  const vp2 = isMobile ? [0.52, 0.52] : [0.57, 0.54];
-
-  // Pin runway: desktop ~450vh (+=350%), mobile ~300vh (+=200%)
-  const pinDistance = isMobile ? '+=200%' : '+=350%';
+  // Pin runway duration: desktop ~420vh (+=320%), mobile ~300vh (+=200%)
+  const pinDistance = isMobile ? '+=200%' : '+=320%';
 
   const st = ScrollTrigger.create({
     trigger: section,
@@ -69,7 +67,7 @@ export function initHeroAnimation({
     observer.observe(section);
   }
 
-  // Pre-set elements
+  // Initial states
   if (plane) {
     gsap.set(plane, {
       x: 0,
@@ -77,26 +75,19 @@ export function initHeroAnimation({
       scale: 1,
       rotation: 0,
       opacity: 1,
+      filter: 'brightness(1) saturate(1)',
       force3D: true,
       transformOrigin: '50% 50%',
     });
   }
 
-  if (title) {
-    gsap.set(title, {
-      opacity: 0,
-      y: isMobile ? 24 : 20,
-      force3D: true,
-    });
-  }
+  // Pre-set title letters and taglines hidden below their overflow masks
+  titleLetters.forEach((el) => {
+    if (el) gsap.set(el, { yPercent: 110, opacity: 0, force3D: true });
+  });
 
-  if (taglines) {
-    gsap.set(taglines, {
-      opacity: 0,
-      y: isMobile ? 24 : 20,
-      force3D: true,
-    });
-  }
+  if (tagline1) gsap.set(tagline1, { yPercent: 110, opacity: 0, force3D: true });
+  if (tagline2) gsap.set(tagline2, { yPercent: 110, opacity: 0, force3D: true });
 
   // ─────────────────────────────────────────────────────────────
   // Smooth Damped Animation Loop (uProgress += (target - uProgress) * 0.12)
@@ -124,8 +115,8 @@ export function initHeroAnimation({
     const p = currentProgress;
     const timeSec = now * 0.001;
 
-    // ── 1. Plane Movement ──
-    // At scroll=0, plane is 100% STATIC (no idle movement, no bobbing)
+    // ── 1. Plane Movement (Nose direction: left-bottom to right-up valley) ──
+    // At scroll = 0, plane is 100% STATIC (no idle bob, no float, no bank)
     if (plane) {
       if (p <= 0.0005) {
         gsap.set(plane, {
@@ -134,42 +125,59 @@ export function initHeroAnimation({
           scale: 1,
           rotation: 0,
           opacity: 1,
+          filter: 'brightness(1) saturate(1)',
         });
       } else if (p < 0.52) {
         // Plane travels toward vanishing point over p 0.00 -> 0.50
         const tFlight = Math.min(1.0, p / 0.50);
-        const easeFlight = Math.pow(tFlight, 0.85); // power1.out feel
+        // Strictly monotonic easing (power1.out feel)
+        const easeFlight = Math.pow(tFlight, 0.88);
 
         const targetX = isMobile ? 24 : 27; // in vw
         const targetY = isMobile ? -10 : -7; // in vh
 
         const curX = targetX * easeFlight;
         const curY = targetY * easeFlight;
+        // Strictly monotonic decreasing scale: 1.0 -> 0.15 (never grows!)
         const curScale = 1.0 - (1.0 - 0.15) * easeFlight;
         const curRot = 2 * easeFlight; // 0 to 2deg
 
-        // Opacity 1 -> 0 strictly in the last 15% (0.35 -> 0.50)
+        // Atmospheric perspective: tint toward haze as it recedes
+        const hazeMix = 1.0 - 0.45 * easeFlight;
+
+        // Plane passes behind cloud puff around p 0.25 - 0.42: softly dip alpha
+        let cloudPuffAlpha = 1.0;
+        if (p >= 0.24 && p <= 0.42) {
+          const puffNorm = (p - 0.24) / (0.42 - 0.24);
+          const dip = Math.sin(puffNorm * Math.PI) * 0.55;
+          cloudPuffAlpha = 1.0 - dip;
+        }
+
+        // Final fade out strictly in the last 15% (0.35 -> 0.50)
         let curOpacity = 1.0;
         if (p >= 0.35) {
           const tFade = (p - 0.35) / 0.15;
           curOpacity = Math.max(0, 1.0 - tFade);
         }
 
+        const finalPlaneOpacity = curOpacity * cloudPuffAlpha;
+
         gsap.set(plane, {
           x: `${curX}vw`,
           y: `${curY}vh`,
           scale: curScale,
           rotation: curRot,
-          opacity: curOpacity,
+          opacity: finalPlaneOpacity,
+          filter: `brightness(${0.95 + 0.05 * hazeMix}) saturate(${hazeMix})`,
         });
       } else {
         gsap.set(plane, { opacity: 0 });
       }
     }
 
-    // ── 2. Camera Dolly & Scene Mix Progress ──
-    // 0.00 - 0.50: plane door jaata hai + camera dolly 0 -> 0.60
-    // 0.40 - 0.75: uMix 0 -> 1 (crossfade scene2) + dolly 0.60 -> 0.85
+    // ── 2. Camera Push, Haze Fade & Scene2 Tilt Progress ──
+    // 0.00 - 0.50: camera push 0 -> 0.60
+    // 0.40 - 0.75: haze fade + uMix 0 -> 1 + scene2 tilt up (+0.06 -> 0)
     let dollyProgress = 0;
     if (p <= 0.50) {
       dollyProgress = (p / 0.50) * 0.60;
@@ -181,50 +189,79 @@ export function initHeroAnimation({
     // uMix: 0 -> 1 across p 0.40 -> 0.75
     let uMix = 0;
     if (p >= 0.40) {
-      uMix = Math.min(1.0, (p - 0.40) / 0.35);
-      // Smooth cosine interpolation
-      uMix = 0.5 - 0.5 * Math.cos(uMix * Math.PI);
+      const tMix = Math.min(1.0, (p - 0.40) / 0.35);
+      uMix = 0.5 - 0.5 * Math.cos(tMix * Math.PI);
     }
+
+    // uHaze: 0 -> 0.50 (peak ~0.58) -> 0 across 0.40 -> 0.75
+    let uHaze = 0;
+    if (p >= 0.40 && p <= 0.75) {
+      const tHaze = (p - 0.40) / 0.35;
+      uHaze = Math.sin(tHaze * Math.PI) * 0.50;
+    }
+
+    // uTilt: scene2 down-to-up movie camera pan (+0.06 -> 0.0)
+    let uTilt = 0.06 * (1.0 - uMix);
 
     // Update OGL Shader uniforms
     if (oglCtx && oglCtx.program && oglCtx.renderer) {
       const { program, renderer, mesh } = oglCtx;
       program.uniforms.uProgress.value = dollyProgress;
       program.uniforms.uMix.value = uMix;
+      program.uniforms.uHaze.value = uHaze;
+      program.uniforms.uTilt.value = uTilt;
       program.uniforms.uTime.value = prefersReducedMotion ? 0 : timeSec;
       renderer.render({ scene: mesh });
     }
 
-    // ── 3. Title & Taglines (0.65 -> 0.90) ──
-    if (title) {
-      if (p < 0.62) {
-        gsap.set(title, { opacity: 0, y: isMobile ? 24 : 20 });
+    // ── 3. Movie-Style DOWN TO UP Title Reveal (0.62 -> 0.92) ──
+    // Letter-by-letter stagger for 'V', 'A', 'Y', 'A'
+    const letterStarts = [0.62, 0.67, 0.72, 0.77];
+    titleLetters.forEach((el, idx) => {
+      if (!el) return;
+      const startP = letterStarts[idx];
+      if (p < startP) {
+        gsap.set(el, { yPercent: 110, opacity: 0 });
       } else {
-        const tTitle = Math.min(1.0, (p - 0.62) / 0.20);
-        const easeTitle = 1 - Math.pow(1 - tTitle, 2);
-        gsap.set(title, {
-          opacity: easeTitle,
-          y: (1 - easeTitle) * (isMobile ? 24 : 20),
+        const t = Math.min(1.0, (p - startP) / 0.10);
+        // power3.out easing: 1 - (1 - t)^3
+        const ease = 1 - Math.pow(1 - t, 3);
+        gsap.set(el, {
+          yPercent: (1 - ease) * 110,
+          opacity: ease,
+        });
+      }
+    });
+
+    // Tagline 1: "Know before you go" (0.78 -> 0.88)
+    if (tagline1) {
+      if (p < 0.78) {
+        gsap.set(tagline1, { yPercent: 110, opacity: 0 });
+      } else {
+        const t = Math.min(1.0, (p - 0.78) / 0.10);
+        const ease = 1 - Math.pow(1 - t, 3);
+        gsap.set(tagline1, {
+          yPercent: (1 - ease) * 110,
+          opacity: ease,
         });
       }
     }
 
-    if (taglines) {
-      const tagStart = isMobile ? 0.68 : 0.68;
-      if (p < tagStart) {
-        gsap.set(taglines, { opacity: 0, y: isMobile ? 24 : 20 });
+    // Tagline 2: "Step in, step out" (0.84 -> 0.94)
+    if (tagline2) {
+      if (p < 0.84) {
+        gsap.set(tagline2, { yPercent: 110, opacity: 0 });
       } else {
-        const tTag = Math.min(1.0, (p - tagStart) / 0.20);
-        const easeTag = 1 - Math.pow(1 - tTag, 2);
-        gsap.set(taglines, {
-          opacity: easeTag,
-          y: (1 - easeTag) * (isMobile ? 24 : 20),
+        const t = Math.min(1.0, (p - 0.84) / 0.10);
+        const ease = 1 - Math.pow(1 - t, 3);
+        gsap.set(tagline2, {
+          yPercent: (1 - ease) * 110,
+          opacity: ease,
         });
       }
     }
 
-    // ── 4. Scroll Indicator ──
-    // BUG FIX: Must fully hide once p > 0.05 and never show while scrolling down
+    // ── 4. Scroll Indicator (Disappears as soon as scroll begins p > 0.05) ──
     if (scrollHint) {
       if (p <= 0.05) {
         const hintOpacity = Math.max(0, 1.0 - p / 0.05) * 0.75;

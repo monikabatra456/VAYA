@@ -9,10 +9,24 @@ export default function Hero() {
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const planeRef = useRef(null);
-  const titleRef = useRef(null);
-  const taglinesRef = useRef(null);
   const scrollHintRef = useRef(null);
   const posterRef = useRef(null);
+
+  // Desktop letter refs
+  const dVRef = useRef(null);
+  const dARef1 = useRef(null);
+  const dYRef = useRef(null);
+  const dARef2 = useRef(null);
+  const dTag1Ref = useRef(null);
+  const dTag2Ref = useRef(null);
+
+  // Mobile letter refs
+  const mVRef = useRef(null);
+  const mARef1 = useRef(null);
+  const mYRef = useRef(null);
+  const mARef2 = useRef(null);
+  const mTag1Ref = useRef(null);
+  const mTag2Ref = useRef(null);
 
   const [webglReady, setWebglReady] = useState(false);
 
@@ -23,6 +37,13 @@ export default function Hero() {
       ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
         (navigator.deviceMemory && navigator.deviceMemory <= 4));
 
+    const titleLetters = isMobile
+      ? [mVRef.current, mARef1.current, mYRef.current, mARef2.current]
+      : [dVRef.current, dARef1.current, dYRef.current, dARef2.current];
+
+    const tagline1 = isMobile ? mTag1Ref.current : dTag1Ref.current;
+    const tagline2 = isMobile ? mTag2Ref.current : dTag2Ref.current;
+
     // Fallback if low-end or WebGL unsupported
     const canvas = canvasRef.current;
     if (!canvas || isLowEnd) {
@@ -30,8 +51,9 @@ export default function Hero() {
         section: sectionRef.current,
         canvas: null,
         plane: planeRef.current,
-        title: titleRef.current,
-        taglines: taglinesRef.current,
+        titleLetters,
+        tagline1,
+        tagline2,
         scrollHint: scrollHintRef.current,
         oglCtx: null,
         isMobile,
@@ -41,34 +63,36 @@ export default function Hero() {
       };
     }
 
-    let W = window.innerWidth;
-    let H = window.innerHeight;
+    // Integer device pixels to prevent shimmer
+    let W = Math.round(window.innerWidth);
+    let H = Math.round(window.innerHeight);
 
-    // ── 1. Create OGL Renderer ──
-    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.5);
+    // Fixed DPR: desktop 1.5, mobile 1.25
+    const fixedDpr = isMobile ? 1.25 : Math.min(1.5, window.devicePixelRatio || 1);
+
     let renderer;
     try {
       renderer = new Renderer({
         canvas,
         width: W,
         height: H,
-        dpr,
+        dpr: fixedDpr,
         alpha: false,
         antialias: false,
         powerPreference: 'high-performance',
       });
     } catch (e) {
-      console.warn('WebGL init failed, using fallback', e);
+      console.warn('WebGL init error, using fallback', e);
       return;
     }
 
     const gl = renderer.gl;
 
-    // ── 2. Create OGL Textures ──
+    // Texture creator with decoding, mipmaps, and LINEAR filtering
     function createTexture(url, isTileable = false) {
       const tex = new Texture(gl, {
-        generateMipmaps: false,
-        minFilter: gl.LINEAR,
+        generateMipmaps: true,
+        minFilter: gl.LINEAR_MIPMAP_LINEAR,
         magFilter: gl.LINEAR,
         wrapS: isTileable ? gl.REPEAT : gl.CLAMP_TO_EDGE,
         wrapT: isTileable ? gl.REPEAT : gl.CLAMP_TO_EDGE,
@@ -76,27 +100,22 @@ export default function Hero() {
 
       const img = new Image();
       img.src = url;
-      img.decoding = 'async';
 
-      const promise = new Promise((resolve) => {
-        if (img.complete) {
-          tex.image = img;
-          resolve(img);
-        } else {
-          img.onload = () => {
-            tex.image = img;
-            resolve(img);
-          };
-          img.onerror = () => resolve(null);
-        }
+      const decodePromise = (
+        img.decode
+          ? img.decode().catch(() => {})
+          : Promise.resolve()
+      ).then(() => {
+        tex.image = img;
+        return img;
       });
 
-      return { tex, promise };
+      return { tex, promise: decodePromise };
     }
 
-    // Strictly use the original pastel mountain-lake image (bg.jpg) with turquoise lake & peach sky
-    const heroSrc = isMobile ? '/hero/mobile/hero-m.webp' : '/hero/bg.jpg';
-    const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.jpg';
+    // Separate desktop vs mobile textures
+    const heroSrc = isMobile ? '/hero/mobile/hero-noplane-m.webp' : '/hero/hero-noplane.webp';
+    const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.webp';
     const depthHeroSrc = isMobile ? '/hero/mobile/depth-hero-m.webp' : '/hero/depth-hero.webp';
     const depthScene2Src = isMobile ? '/hero/mobile/depth-scene2-m.webp' : '/hero/depth-scene2.webp';
     const mistNoiseSrc = '/hero/mist-noise.webp';
@@ -107,8 +126,7 @@ export default function Hero() {
     const tDepthScene2 = createTexture(depthScene2Src);
     const tMistNoise = createTexture(mistNoiseSrc, true);
 
-    const vp1 = isMobile ? [0.55, 0.48] : [0.62, 0.45];
-    const vp2 = isMobile ? [0.52, 0.52] : [0.57, 0.54];
+    const vp = isMobile ? [0.55, 0.48] : [0.62, 0.45];
 
     // Single fullscreen triangle geometry (1 draw call)
     const geometry = new Triangle(gl);
@@ -123,13 +141,13 @@ export default function Hero() {
         uMistTex: { value: tMistNoise.tex },
         uProgress: { value: 0 },
         uMix: { value: 0 },
+        uTilt: { value: 0.06 },
+        uHaze: { value: 0 },
         uTime: { value: 0 },
         uRes: { value: [W, H] },
         uImgRes: { value: isMobile ? [1080, 1920] : [2048, 1152] },
-        uVP: { value: vp1 },
-        uVP2: { value: vp2 },
-        uMaxZoom: { value: isMobile ? 1.35 : 1.6 },
-        uMistStrength: { value: isMobile ? 0.15 : 0.22 },
+        uVP: { value: vp },
+        uMistStrength: { value: isMobile ? 0.18 : 0.25 },
       },
       depthTest: false,
       depthWrite: false,
@@ -137,7 +155,7 @@ export default function Hero() {
 
     const mesh = new Mesh(gl, { geometry, program });
 
-    // Render 1 initial frame
+    // Initial render
     renderer.render({ scene: mesh });
 
     const oglCtx = { renderer, program, mesh };
@@ -147,26 +165,27 @@ export default function Hero() {
       section: sectionRef.current,
       canvas,
       plane: planeRef.current,
-      title: titleRef.current,
-      taglines: taglinesRef.current,
+      titleLetters,
+      tagline1,
+      tagline2,
       scrollHint: scrollHintRef.current,
       oglCtx,
       isMobile,
     });
 
-    // Fade in canvas once critical textures load (smooth 200ms transition)
+    // Fade in canvas only after critical textures are decoded
     Promise.all([tHero.promise, tDepthHero.promise, tMistNoise.promise]).then(() => {
       renderer.render({ scene: mesh });
       setWebglReady(true);
     });
 
-    // Window resize handler (debounced)
+    // Debounced resize handler
     let resizeTimer = null;
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        W = window.innerWidth;
-        H = window.innerHeight;
+        W = Math.round(window.innerWidth);
+        H = Math.round(window.innerHeight);
         renderer.setSize(W, H);
         program.uniforms.uRes.value = [W, H];
         if (animInstance) animInstance.refresh();
@@ -195,7 +214,7 @@ export default function Hero() {
       }}
       aria-label="VAYA — Stand In. Step Out."
     >
-      {/* ── 1. Static LCP Poster (hero-noplane + plane DOM layer, swaps seamlessly to WebGL) ── */}
+      {/* ── 1. Static LCP Poster (hero-noplane + plane DOM layer, seamless 200ms swap) ── */}
       <div
         ref={posterRef}
         className={`absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-200 ease-out z-0 ${
@@ -203,10 +222,10 @@ export default function Hero() {
         }`}
       >
         <picture>
-          <source media="(max-width: 768px)" srcSet="/hero/mobile/hero-m.webp" />
+          <source media="(max-width: 768px)" srcSet="/hero/mobile/hero-noplane-m.webp" />
           <img
-            src="/hero/bg.jpg"
-            alt="Pastel Alpine Mountain Valley"
+            src="/hero/hero-noplane.webp"
+            alt="Alpine Mountain Valley"
             className="w-full h-full object-cover select-none"
             fetchPriority="high"
             decoding="async"
@@ -215,7 +234,7 @@ export default function Hero() {
         </picture>
       </div>
 
-      {/* ── 2. OGL WebGL Canvas (1 draw call, depth parallax & valley mist) ── */}
+      {/* ── 2. OGL WebGL Canvas (1 draw call, NO CSS transform/filter, integer pixels) ── */}
       <canvas
         ref={canvasRef}
         className={`absolute inset-0 w-full h-full block pointer-events-none transition-opacity duration-200 ease-out z-[1] ${
@@ -227,7 +246,7 @@ export default function Hero() {
         }}
       />
 
-      {/* ── 3. Plane Cutout Sprite (Static at scroll=0, recedes to vanishing point on scroll) ── */}
+      {/* ── 3. Plane Cutout Sprite (Static at scroll=0, flies nose-first to valley on scroll) ── */}
       <div
         ref={planeRef}
         className="absolute pointer-events-none will-change-transform z-10 -translate-x-1/2 -translate-y-1/2
@@ -246,84 +265,112 @@ export default function Hero() {
         </picture>
       </div>
 
-      {/* ── 4. Columbus Travel-Style Typography Overlay ── */}
-      {/* DESKTOP LAYOUT (md:block): Left "VAYA", Right Taglines */}
+      {/* ── 4. Movie-Style Typography Overlay with DOWN TO UP Mask Reveals ── */}
+
+      {/* DESKTOP LAYOUT (md:block): Left "VAYA" staggered letters, Right Taglines */}
       <div className="hidden md:block absolute inset-0 pointer-events-none z-20">
-        {/* LEFT: "VAYA" in NAVY BLUE #14213d, Outfit 200, letter-spacing .25em */}
-        <div
-          ref={titleRef}
-          className="absolute will-change-transform opacity-0 select-none
-            left-[8vw] top-[45vh] -translate-y-1/2 text-left"
-        >
+        {/* LEFT: "VAYA" in NAVY #14213d, Outfit 200, clamp(72px, 12vw, 210px), letter-by-letter reveal */}
+        <div className="absolute left-[8vw] top-[45vh] -translate-y-1/2 text-left select-none">
           <h1
-            className="font-[200] text-[#14213d] leading-none uppercase select-none text-[clamp(72px,12vw,210px)]"
+            className="font-[200] text-[#14213d] leading-none uppercase select-none text-[clamp(72px,12vw,210px)] flex items-center"
             style={{
               letterSpacing: '0.25em',
               textShadow: '0 0 24px rgba(255, 255, 255, 0.6)',
             }}
           >
-            VAYA
+            <span className="overflow-hidden inline-block py-2">
+              <span ref={dVRef} className="inline-block will-change-transform">V</span>
+            </span>
+            <span className="overflow-hidden inline-block py-2">
+              <span ref={dARef1} className="inline-block will-change-transform">A</span>
+            </span>
+            <span className="overflow-hidden inline-block py-2">
+              <span ref={dYRef} className="inline-block will-change-transform">Y</span>
+            </span>
+            <span className="overflow-hidden inline-block py-2">
+              <span ref={dARef2} className="inline-block will-change-transform">A</span>
+            </span>
           </h1>
         </div>
 
-        {/* RIGHT: Taglines in BLUE #1f4f9c & #2f66b8 */}
-        <div
-          ref={taglinesRef}
-          className="absolute will-change-transform opacity-0 select-none
-            right-[7vw] top-[58vh] -translate-y-1/2 text-left max-w-[420px]"
-        >
-          <p
-            className="font-[400] text-[#1f4f9c] leading-tight select-none mb-2 text-[clamp(26px,3vw,52px)]"
-            style={{
-              textShadow: '0 0 24px rgba(255, 255, 255, 0.6)',
-            }}
-          >
-            Know before you go
-          </p>
-          <p
-            className="font-[300] text-[#2f66b8] leading-normal select-none text-[clamp(20px,2.2vw,38px)]"
-            style={{
-              textShadow: '0 0 24px rgba(255, 255, 255, 0.6)',
-            }}
-          >
-            Step in, step out
-          </p>
+        {/* RIGHT: Taglines in BLUE #1f4f9c & #2f66b8 with down-to-up mask reveals */}
+        <div className="absolute right-[7vw] top-[58vh] -translate-y-1/2 text-left max-w-[420px] select-none">
+          <div className="overflow-hidden block mb-2 py-1">
+            <p
+              ref={dTag1Ref}
+              className="font-[400] text-[#1f4f9c] leading-tight select-none text-[clamp(26px,3vw,52px)] will-change-transform"
+              style={{
+                textShadow: '0 0 24px rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              Know before you go
+            </p>
+          </div>
+
+          <div className="overflow-hidden block py-1">
+            <p
+              ref={dTag2Ref}
+              className="font-[300] text-[#2f66b8] leading-normal select-none text-[clamp(20px,2.2vw,38px)] will-change-transform"
+              style={{
+                textShadow: '0 0 24px rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              Step in, step out
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* MOBILE LAYOUT (block md:hidden): Stacked in sky upper region for crisp contrast */}
+      {/* MOBILE LAYOUT (block md:hidden): Stacked in sky upper region with mask reveals */}
       <div className="block md:hidden absolute inset-0 pointer-events-none z-20">
         <div className="absolute top-[16svh] left-0 w-full flex flex-col items-center text-center px-4 select-none">
           {/* VAYA: navy #14213d, ~20vw, letter-spacing 0.2em */}
           <h1
-            className="font-[200] text-[#14213d] leading-none uppercase select-none text-[20vw] mb-3"
+            className="font-[200] text-[#14213d] leading-none uppercase select-none text-[20vw] mb-3 flex items-center justify-center"
             style={{
               letterSpacing: '0.2em',
               textShadow: '0 0 24px rgba(255, 255, 255, 0.7)',
             }}
           >
-            VAYA
+            <span className="overflow-hidden inline-block py-1">
+              <span ref={mVRef} className="inline-block will-change-transform">V</span>
+            </span>
+            <span className="overflow-hidden inline-block py-1">
+              <span ref={mARef1} className="inline-block will-change-transform">A</span>
+            </span>
+            <span className="overflow-hidden inline-block py-1">
+              <span ref={mYRef} className="inline-block will-change-transform">Y</span>
+            </span>
+            <span className="overflow-hidden inline-block py-1">
+              <span ref={mARef2} className="inline-block will-change-transform">A</span>
+            </span>
           </h1>
 
           {/* Know before you go: blue #1f4f9c ~6.5vw, weight 400 */}
-          <p
-            className="font-[400] text-[#1f4f9c] leading-tight select-none text-[6.5vw] mb-1.5"
-            style={{
-              textShadow: '0 0 24px rgba(255, 255, 255, 0.7)',
-            }}
-          >
-            Know before you go
-          </p>
+          <div className="overflow-hidden block mb-1.5 py-0.5">
+            <p
+              ref={mTag1Ref}
+              className="font-[400] text-[#1f4f9c] leading-tight select-none text-[6.5vw] will-change-transform"
+              style={{
+                textShadow: '0 0 24px rgba(255, 255, 255, 0.7)',
+              }}
+            >
+              Know before you go
+            </p>
+          </div>
 
           {/* Step in, step out: blue #2f66b8 ~5vw, weight 300 */}
-          <p
-            className="font-[300] text-[#2f66b8] leading-normal select-none text-[5vw]"
-            style={{
-              textShadow: '0 0 24px rgba(255, 255, 255, 0.7)',
-            }}
-          >
-            Step in, step out
-          </p>
+          <div className="overflow-hidden block py-0.5">
+            <p
+              ref={mTag2Ref}
+              className="font-[300] text-[#2f66b8] leading-normal select-none text-[5vw] will-change-transform"
+              style={{
+                textShadow: '0 0 24px rgba(255, 255, 255, 0.7)',
+              }}
+            >
+              Step in, step out
+            </p>
+          </div>
         </div>
       </div>
 
