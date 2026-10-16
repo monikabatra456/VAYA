@@ -23,7 +23,6 @@ export class HeroScene {
 
     this.gl = this.renderer.gl;
 
-    // Separate texture paths for mobile vs desktop
     const heroSrc = isMobile ? '/hero/mobile/hero-noplane-m.webp' : '/hero/hero-noplane.webp';
     const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.webp';
     const depthHeroSrc = isMobile ? '/hero/mobile/depth-hero-m.webp' : '/hero/depth-hero.webp';
@@ -52,12 +51,13 @@ export class HeroScene {
         uMix: { value: 0 },
         uHaze: { value: 0 },
         uTilt: { value: 0.06 },
+        uZoom: { value: 1.00 },
         uTime: { value: 0 },
         uRes: { value: [W, H] },
         uImgRes: { value: isMobile ? [1080, 1920] : [2048, 1152] },
         uVP: { value: vp },
-        uMaxZoom: { value: isMobile ? 1.20 : 1.35 },
-        uMistStrength: { value: isMobile ? 0.20 : 0.28 },
+        uMistStrength: { value: isMobile ? 0.16 : 0.22 },
+        uWarpScale: { value: 0.0 }, // CLOUD_WARP = false per prompt instructions (zero shimmer on rocks)
       },
       depthTest: false,
       depthWrite: false,
@@ -96,12 +96,13 @@ export class HeroScene {
     ]);
   }
 
-  render({ progress = 0, mix = 0, haze = 0, tilt = 0, time = 0 }) {
+  render({ progress = 0, mix = 0, haze = 0, tilt = 0, zoom = 1.0, time = 0 }) {
     if (!this.program || !this.renderer) return;
     this.program.uniforms.uProgress.value = progress;
     this.program.uniforms.uMix.value = mix;
     this.program.uniforms.uHaze.value = haze;
     this.program.uniforms.uTilt.value = tilt;
+    this.program.uniforms.uZoom.value = zoom;
     this.program.uniforms.uTime.value = time;
     this.renderer.render({ scene: this.mesh });
   }
@@ -115,7 +116,6 @@ export class HeroScene {
   }
 
   destroy() {
-    // Release resources
     this.renderer = null;
     this.program = null;
     this.mesh = null;
