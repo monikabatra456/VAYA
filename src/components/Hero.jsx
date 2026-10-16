@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
-import { vertexShader, fragmentShader } from './heroShader';
+import { HeroScene } from './HeroScene';
+import AmbientObjects from './AmbientObjects';
 import { initHeroAnimation } from './heroTimeline';
 
 export default function Hero() {
@@ -29,9 +29,13 @@ export default function Hero() {
   const mTag2Ref = useRef(null);
 
   const [webglReady, setWebglReady] = useState(false);
+  const [scene2Active, setScene2Active] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
     const isMobile = window.innerWidth <= 768;
+    setIsMobileDevice(isMobile);
+
     const isLowEnd =
       typeof navigator !== 'undefined' &&
       ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
@@ -44,18 +48,17 @@ export default function Hero() {
     const tagline1 = isMobile ? mTag1Ref.current : dTag1Ref.current;
     const tagline2 = isMobile ? mTag2Ref.current : dTag2Ref.current;
 
-    // Fallback if low-end or WebGL unsupported
     const canvas = canvasRef.current;
     if (!canvas || isLowEnd) {
       const animInstance = initHeroAnimation({
         section: sectionRef.current,
-        canvas: null,
         plane: planeRef.current,
         titleLetters,
         tagline1,
         tagline2,
         scrollHint: scrollHintRef.current,
-        oglCtx: null,
+        heroScene: null,
+        onScene2Change: setScene2Active,
         isMobile,
       });
       return () => {
@@ -63,119 +66,30 @@ export default function Hero() {
       };
     }
 
-    // Integer device pixels to prevent shimmer
-    let W = Math.round(window.innerWidth);
-    let H = Math.round(window.innerHeight);
-
-    // Fixed DPR: desktop 1.5, mobile 1.25
-    const fixedDpr = isMobile ? 1.25 : Math.min(1.5, window.devicePixelRatio || 1);
-
-    let renderer;
+    let heroScene;
     try {
-      renderer = new Renderer({
-        canvas,
-        width: W,
-        height: H,
-        dpr: fixedDpr,
-        alpha: false,
-        antialias: false,
-        powerPreference: 'high-performance',
-      });
+      heroScene = new HeroScene({ canvas, isMobile });
     } catch (e) {
-      console.warn('WebGL init error, using fallback', e);
+      console.warn('HeroScene init error, fallback active', e);
       return;
     }
-
-    const gl = renderer.gl;
-
-    // Texture creator with decoding, mipmaps, and LINEAR filtering
-    function createTexture(url, isTileable = false) {
-      const tex = new Texture(gl, {
-        generateMipmaps: true,
-        minFilter: gl.LINEAR_MIPMAP_LINEAR,
-        magFilter: gl.LINEAR,
-        wrapS: isTileable ? gl.REPEAT : gl.CLAMP_TO_EDGE,
-        wrapT: isTileable ? gl.REPEAT : gl.CLAMP_TO_EDGE,
-      });
-
-      const img = new Image();
-      img.src = url;
-
-      const decodePromise = (
-        img.decode
-          ? img.decode().catch(() => {})
-          : Promise.resolve()
-      ).then(() => {
-        tex.image = img;
-        return img;
-      });
-
-      return { tex, promise: decodePromise };
-    }
-
-    // Separate desktop vs mobile textures (scene1-clouds as the hero / first image)
-    const heroSrc = isMobile ? '/hero/mobile/scene1-clouds-m.webp' : '/hero/scene1-clouds.webp';
-    const scene2Src = isMobile ? '/hero/mobile/scene2-m.webp' : '/hero/scene2.webp';
-    const depthHeroSrc = isMobile ? '/hero/mobile/depth-hero-m.webp' : '/hero/depth-hero.webp';
-    const depthScene2Src = isMobile ? '/hero/mobile/depth-scene2-m.webp' : '/hero/depth-scene2.webp';
-    const mistNoiseSrc = '/hero/mist-noise.webp';
-
-    const tHero = createTexture(heroSrc);
-    const tScene2 = createTexture(scene2Src);
-    const tDepthHero = createTexture(depthHeroSrc);
-    const tDepthScene2 = createTexture(depthScene2Src);
-    const tMistNoise = createTexture(mistNoiseSrc, true);
-
-    const vp = isMobile ? [0.55, 0.48] : [0.62, 0.45];
-
-    // Single fullscreen triangle geometry (1 draw call)
-    const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex: vertexShader,
-      fragment: fragmentShader,
-      uniforms: {
-        uImg: { value: tHero.tex },
-        uImg2: { value: tScene2.tex },
-        uDepth: { value: tDepthHero.tex },
-        uDepth2: { value: tDepthScene2.tex },
-        uMistTex: { value: tMistNoise.tex },
-        uProgress: { value: 0 },
-        uMix: { value: 0 },
-        uTilt: { value: 0.06 },
-        uHaze: { value: 0 },
-        uTime: { value: 0 },
-        uRes: { value: [W, H] },
-        uImgRes: { value: isMobile ? [1080, 1920] : [2048, 1152] },
-        uVP: { value: vp },
-        uMistStrength: { value: isMobile ? 0.18 : 0.25 },
-      },
-      depthTest: false,
-      depthWrite: false,
-    });
-
-    const mesh = new Mesh(gl, { geometry, program });
-
-    // Initial render
-    renderer.render({ scene: mesh });
-
-    const oglCtx = { renderer, program, mesh };
 
     // Initialize animation timeline
     const animInstance = initHeroAnimation({
       section: sectionRef.current,
-      canvas,
       plane: planeRef.current,
       titleLetters,
       tagline1,
       tagline2,
       scrollHint: scrollHintRef.current,
-      oglCtx,
+      heroScene,
+      onScene2Change: setScene2Active,
       isMobile,
     });
 
-    // Fade in canvas only after critical textures are decoded
-    Promise.all([tHero.promise, tDepthHero.promise, tMistNoise.promise]).then(() => {
-      renderer.render({ scene: mesh });
+    // Fade in canvas once critical textures decode
+    heroScene.whenReady().then(() => {
+      heroScene.render({ progress: 0, mix: 0, haze: 0, tilt: 0.06, time: 0 });
       setWebglReady(true);
     });
 
@@ -184,10 +98,9 @@ export default function Hero() {
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        W = Math.round(window.innerWidth);
-        H = Math.round(window.innerHeight);
-        renderer.setSize(W, H);
-        program.uniforms.uRes.value = [W, H];
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        heroScene.resize(W, H);
         if (animInstance) animInstance.refresh();
       }, 150);
     };
@@ -200,6 +113,7 @@ export default function Hero() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
       if (animInstance) animInstance.kill();
+      if (heroScene) heroScene.destroy();
     };
   }, []);
 
@@ -222,10 +136,10 @@ export default function Hero() {
         }`}
       >
         <picture>
-          <source media="(max-width: 768px)" srcSet="/hero/mobile/scene1-clouds-m.webp" />
+          <source media="(max-width: 768px)" srcSet="/hero/mobile/hero-noplane-m.webp" />
           <img
-            src="/hero/scene1-clouds.webp"
-            alt="Alpine Mountain Clouds"
+            src="/hero/hero-noplane.webp"
+            alt="Alpine Mountain Valley"
             className="w-full h-full object-cover select-none"
             fetchPriority="high"
             decoding="async"
@@ -265,7 +179,10 @@ export default function Hero() {
         </picture>
       </div>
 
-      {/* ── 4. Movie-Style Typography Overlay with DOWN TO UP Mask Reveals ── */}
+      {/* ── 4. Scene 2 Ambient Live Objects: Drifting Birds & Hot Air Balloons ── */}
+      <AmbientObjects visible={scene2Active} isMobile={isMobileDevice} />
+
+      {/* ── 5. Movie-Style Typography Overlay with DOWN TO UP Mask Reveals ── */}
 
       {/* DESKTOP LAYOUT (md:block): Left "VAYA" staggered letters, Right Taglines */}
       <div className="hidden md:block absolute inset-0 pointer-events-none z-20">
@@ -374,7 +291,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ── 5. Scroll to explore hint (Fades out completely once p > 0.05) ── */}
+      {/* ── 6. Scroll to explore hint (Fades out completely once p > 0.05) ── */}
       <div
         ref={scrollHintRef}
         className="absolute bottom-[4vh] left-1/2 -translate-x-1/2 pointer-events-none z-10 flex flex-col items-center select-none"
