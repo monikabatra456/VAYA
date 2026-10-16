@@ -26,14 +26,14 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/hero/hero-noplane.webp"
+          href="/hero/scene1-clouds.webp"
           media="(min-width: 769px)"
           type="image/webp"
         />
         <link
           rel="preload"
           as="image"
-          href="/hero/mobile/hero-noplane-m.webp"
+          href="/hero/mobile/scene1-clouds-m.webp"
           media="(max-width: 768px)"
           type="image/webp"
         />
