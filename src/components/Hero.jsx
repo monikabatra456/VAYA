@@ -1,6 +1,6 @@
 // src/components/Hero.jsx – Section 1: Cinematic Hero v4
 // Native scroll + gsap.ticker. No ScrollTrigger, no Lenis.
-// Fixes: depth/flying feel, vignette, even plane speed, scene-B birds+balloon.
+// Fixes: depth/flying feel, vignette, even plane speed, scene-B birds.
 // Cloud photo layers only — zero procedural cloud sprites.
 "use client";
 
@@ -61,42 +61,6 @@ function BirdSVG({ scale }) {
   );
 }
 
-function BalloonSVG({ size }) {
-  return (
-    <svg width={size} height={size * 1.4} viewBox="0 0 120 168" aria-hidden="true" style={{ display: "block", overflow: "visible" }}>
-      <defs>
-        <radialGradient id="bal-sky" cx="45%" cy="38%" r="60%">
-          <stop offset="0%"   stopColor="#fde8c8"/>
-          <stop offset="45%"  stopColor="#f5b97a"/>
-          <stop offset="100%" stopColor="#e07b4a"/>
-        </radialGradient>
-        <radialGradient id="bal-stripe" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="rgba(255,255,255,0.22)"/>
-          <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-        </radialGradient>
-        <radialGradient id="bal-shadow" cx="30%" cy="30%" r="65%">
-          <stop offset="0%"   stopColor="rgba(150,80,30,0)"/>
-          <stop offset="100%" stopColor="rgba(150,80,30,0.28)"/>
-        </radialGradient>
-      </defs>
-      <ellipse cx="60" cy="62" rx="46" ry="56" fill="url(#bal-sky)"/>
-      <ellipse cx="60" cy="62" rx="46" ry="56" fill="url(#bal-shadow)"/>
-      <ellipse cx="46" cy="52" rx="18" ry="28" fill="url(#bal-stripe)"/>
-      {[0,60,120,180,240,300].map((a,i) => {
-        const rad = (a*Math.PI)/180;
-        return <line key={i} x1={60+Math.sin(rad)*10} y1={12} x2={60+Math.sin(rad)*6} y2={116} stroke="rgba(190,110,50,0.22)" strokeWidth="1"/>;
-      })}
-      <line x1="44" y1="116" x2="44" y2="138" stroke="rgba(120,70,20,0.55)" strokeWidth="1.5"/>
-      <line x1="76" y1="116" x2="76" y2="138" stroke="rgba(120,70,20,0.55)" strokeWidth="1.5"/>
-      <line x1="52" y1="114" x2="50" y2="138" stroke="rgba(120,70,20,0.45)" strokeWidth="1.2"/>
-      <line x1="68" y1="114" x2="70" y2="138" stroke="rgba(120,70,20,0.45)" strokeWidth="1.2"/>
-      <rect x="40" y="138" width="40" height="22" rx="4" fill="#c8864a"/>
-      <rect x="40" y="138" width="40" height="4"  rx="2" fill="#a86030"/>
-      <line x1="53" y1="142" x2="53" y2="160" stroke="rgba(100,50,20,0.35)" strokeWidth="1"/>
-      <line x1="67" y1="142" x2="67" y2="160" stroke="rgba(100,50,20,0.35)" strokeWidth="1"/>
-    </svg>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Hero() {
@@ -124,9 +88,8 @@ export default function Hero() {
   const tag2Ref    = useRef(null);
   const cueRef     = useRef(null);
 
-  // Scene 2 — birds + balloon
+  // Scene 2 — birds
   const birdRefs   = useRef([]);
-  const balloonRef = useRef(null);
   const scene2Ref  = useRef(null);
 
   // Idle loops
@@ -238,12 +201,6 @@ export default function Hero() {
       }
     });
 
-    if (balloonRef.current) {
-      const swayTl = gsap.timeline({ repeat: -1, yoyo: true, paused: true });
-      swayTl.to(balloonRef.current, { rotation: 2, y: -8, duration: 3.5, ease: "sine.inOut" });
-      idleLoopsRef.current.push(swayTl);
-      swayTl.play();
-    }
 
     // Scroll loop
     let current = 0;
@@ -539,19 +496,6 @@ export default function Hero() {
             );
           })}
 
-          {/* Balloon — upper right, clear of tagline text */}
-          <div
-            ref={balloonRef}
-            style={{
-              position:      "absolute",
-              right:         isMobile ? "8%" : "22%",
-              top:           isMobile ? "10vh" : "14vh",
-              willChange:    "transform",
-              pointerEvents: "none",
-            }}
-          >
-            <BalloonSVG size={isMobile ? 70 : 108}/>
-          </div>
         </div>
 
         {/* ── 9. TEXT OVERLAY (z100) ────────────────────────────────────────── */}
