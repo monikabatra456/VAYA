@@ -2,47 +2,226 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Brand tokens ────────────────────────────────────────────────────────── */
 :root {
-  --font-outfit: 'Outfit', sans-serif;
+  --cream:        #fdf8ec;
+  --navy:         #25205f;
+  --charcoal:     #14213d;
+  --teal:         #3fb9c9;
+  --gold:         #f5c77e;
+  --blue1:        #2276cc;
+  --blue2:        #4294e0;
+  --font-outfit:  var(--font-outfit), 'Outfit', sans-serif;
+  --font-jakarta: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: auto; /* native scroll, no lib override */
 }
 
-html,
-body {
+html, body {
   width: 100%;
   min-height: 100%;
-  background-color: #f3f2ee;
-  color: #1e2a3f;
-  font-family: var(--font-outfit), sans-serif;
-  overflow-x: hidden;
+  background: var(--cream);
+  color: var(--charcoal);
+  font-family: var(--font-jakarta), sans-serif;
+  overflow-x: clip; /* clip ≠ hidden: preserves position:sticky */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Lenis recommended css */
-html.lenis,
-html.lenis body {
-  height: auto;
+/* ── Hero wrapper (creates scroll space) ─────────────────────────────────── */
+.hero-wrapper {
+  position: relative;
+  height: 900vh;
+}
+@media (max-width: 767px) {
+  .hero-wrapper { height: 650vh; }
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
+/* ── Sticky viewport ─────────────────────────────────────────────────────── */
+.hero-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
   overflow: hidden;
+  background: var(--cream);
 }
 
-.lenis.lenis-scrolling iframe {
+/* ── Background layers (Scene A & B full-frame images) ───────────────────── */
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform, opacity;
   pointer-events: none;
 }
 
+/* ── Cloud Sprites ───────────────────────────────────────────────────────── */
+.hero-cloud-sprite {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* ── Plane ───────────────────────────────────────────────────────────────── */
+.hero-plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30vw;
+  max-width: 580px;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.hero-plane img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Clean drop shadow, no white haze / bloom */
+  filter: drop-shadow(0 6px 18px rgba(37,32,95,0.16));
+}
+/* Contrail: subtle thin gradient line extending behind the plane */
+.hero-contrail {
+  position: absolute;
+  right: 96%;
+  top: 42%;
+  width: 35%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.30));
+  transform: rotate(2deg);
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .hero-plane { width: 56vw; max-width: 440px; }
+}
+
+/* ── Text overlay (hidden until JS reveals) ──────────────────────────────── */
+.hero-text {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* VAYA word ─────────────────────────────────────────────────────────────── */
+.vaya-word {
+  position: absolute;
+  left: 5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+.vaya-word.vaya-center {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.vaya-clip {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+}
+.vaya-letter {
+  display: block;
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 200;
+  font-size: clamp(120px, 17vw, 300px);
+  letter-spacing: 0.04em;
+  color: var(--navy);
+  will-change: transform;
+  white-space: nowrap;
+}
+
+/* Cream radial scrim behind taglines only (max opacity 0.25) */
+.hero-text-scrim {
+  position: absolute;
+  left: 52vw;
+  top: 55vh;
+  width: 44vw;
+  height: 32vh;
+  background: radial-gradient(ellipse at 30% 40%, rgba(253,248,236,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Taglines ──────────────────────────────────────────────────────────────── */
+.hero-tag1 {
+  position: absolute;
+  left: 58vw;
+  top: 62vh;
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(30px, 3.8vw, 68px);
+  font-weight: 300;
+  color: var(--blue1);
+  will-change: transform, opacity;
+  text-shadow: 0 0 28px rgba(253,248,236,0.75);
+  white-space: nowrap;
+}
+.hero-tag2 {
+  position: absolute;
+  left: 58vw;
+  top: calc(62vh + clamp(44px, 5vw, 90px));
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(18px, 2vw, 34px);
+  font-weight: 300;
+  color: var(--blue2);
+  will-change: transform, opacity;
+  text-shadow: 0 0 28px rgba(253,248,236,0.75);
+  white-space: nowrap;
+}
+
+/* Mobile typography & layout */
+@media (max-width: 767px) {
+  .vaya-letter  { font-size: 26vw; }
+  .vaya-word    { left: 5vw; top: 14vh; transform: none; }
+  .hero-tag1 {
+    left: 5vw; top: 54vh; white-space: normal;
+    font-size: clamp(26px, 7vw, 40px);
+  }
+  .hero-tag2 {
+    left: 5vw;
+    top: calc(54vh + clamp(38px, 9.5vw, 56px));
+    font-size: clamp(16px, 4.5vw, 28px);
+  }
+  .hero-text-scrim {
+    left: 0; top: 48vh; width: 100%; height: 35vh;
+    background: radial-gradient(ellipse at 50% 30%, rgba(253,248,236,0.25) 0%, transparent 70%);
+  }
+}
+
+/* ── Scroll cue ──────────────────────────────────────────────────────────── */
+.hero-cue {
+  position: absolute;
+  bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(255,255,255,0.92);
+  text-align: center;
+  pointer-events: none;
+  will-change: opacity;
+  white-space: nowrap;
+}
+.hero-cue span {
+  display: block;
+  margin-top: 7px;
+  font-size: 18px;
+  letter-spacing: 0;
+  animation: cueBounce 1.6s ease-in-out infinite;
+}
+@keyframes cueBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}

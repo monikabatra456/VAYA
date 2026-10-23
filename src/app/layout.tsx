@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -9,28 +9,30 @@ const outfit = Outfit({
   display: "swap",
 });
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "VAYA — Know Before You Go",
-  description: "VAYA — A scroll-driven cinematic journey through alpine landscapes. Know before you go.",
+  description: "VAYA — A cinematic scroll-driven journey through the world's most beautiful destinations. Know before you go.",
+  openGraph: {
+    title: "VAYA — Know Before You Go",
+    description: "Discover crowd levels, seasonal conditions, and local insights before you travel.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={outfit.variable}>
-      <head>
-        {/* Priority LCP Preload: Initial hero frame 1 */}
-        <link
-          rel="preload"
-          as="image"
-          href="/frames/frame_0001.webp"
-          type="image/webp"
-        />
-      </head>
-      <body className="bg-[#f3f2ee] text-[#1e2a3f] antialiased selection:bg-[#1e2a3f] selection:text-[#f3f2ee]">
+    <html lang="en" className={`${outfit.variable} ${jakarta.variable}`}>
+      <head />
+      <body>
         {children}
       </body>
     </html>

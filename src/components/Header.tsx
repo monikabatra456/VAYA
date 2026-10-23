@@ -43,14 +43,14 @@ export default function Header({ visible = true, onWaitlist }: HeaderProps) {
       <div className="flex items-center pointer-events-auto">
         <a
           href="#login"
-          className="hidden md:inline-block font-normal text-[15px] text-[#1F2D3D] mr-[20px] hover:opacity-75 transition-opacity select-none cursor-pointer"
+          className="hidden md:inline-block font-normal text-[15px] text-[#14213d] mr-[24px] hover:text-[#25205f] transition-colors select-none cursor-pointer"
         >
           Login
         </a>
         <button
           type="button"
           onClick={onWaitlist}
-          className="h-11 px-6 rounded-full bg-[#1F2D3D] text-white text-[14px] font-normal tracking-[0.04em] transition-all duration-200 hover:bg-[#2d4258] hover:-translate-y-[1px] active:translate-y-0 active:bg-[#1F2D3D] shadow-sm select-none"
+          className="h-11 px-7 rounded-full bg-[#14213d] text-white text-[14px] font-normal tracking-[0.03em] transition-all duration-200 hover:bg-[#25205f] hover:shadow-[0_4px_16px_rgba(37,32,95,0.25)] hover:-translate-y-[1px] active:translate-y-0 active:bg-[#14213d] shadow-sm select-none"
         >
           Join Waitlist
         </button>
