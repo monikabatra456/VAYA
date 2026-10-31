@@ -40,14 +40,8 @@ export default function Header({ visible = true, onWaitlist }: HeaderProps) {
         />
       </Link>
 
-      {/* RIGHT: Login text link + Join Waitlist pill */}
+      {/* RIGHT: Join Waitlist pill */}
       <div className="flex items-center pointer-events-auto">
-        <a
-          href="#login"
-          className="hidden md:inline-block font-normal text-[15px] text-[#14213d] mr-[24px] hover:text-[#25205f] transition-colors select-none cursor-pointer"
-        >
-          Login
-        </a>
         <button
           type="button"
           onClick={onWaitlist}

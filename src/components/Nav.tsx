@@ -271,45 +271,31 @@ export default function Nav({ onWaitlist }: NavProps) {
           />
         )}
 
-        {/* Right: Desktop (Login + Join Waitlist) vs Mobile (Join Waitlist + Hamburger) */}
+        {/* Right: Desktop (Join Waitlist) vs Mobile (Join Waitlist + Hamburger) */}
         <div style={{ display: "flex", alignItems: "center", gap: isDesktop ? "18px" : "10px", pointerEvents: "auto", flexShrink: 0 }}>
           {isDesktop ? (
-            <>
-              <a
-                href="#login"
-                style={{
-                  fontFamily: "var(--font-jakarta)",
-                  fontSize: "14px",
-                  fontWeight: 400,
-                  color: NAVY,
-                  textDecoration: "none",
-                }}
-              >
-                Login
-              </a>
-              <button
-                onClick={onWaitlist}
-                style={{
-                  height: "40px",
-                  padding: "0 22px",
-                  borderRadius: "20px",
-                  background: NAVY,
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontFamily: "var(--font-jakarta)",
-                  fontWeight: 500,
-                  letterSpacing: "0.04em",
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "background 0.2s, transform 0.18s",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#25205f"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = NAVY; e.currentTarget.style.transform = ""; }}
-              >
-                Join Waitlist
-              </button>
-            </>
+            <button
+              onClick={onWaitlist}
+              style={{
+                height: "40px",
+                padding: "0 22px",
+                borderRadius: "20px",
+                background: NAVY,
+                color: "#fff",
+                fontSize: "13px",
+                fontFamily: "var(--font-jakarta)",
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.2s, transform 0.18s",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#25205f"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = NAVY; e.currentTarget.style.transform = ""; }}
+            >
+              Join Waitlist
+            </button>
           ) : (
             <>
               {/* Mobile "Join Waitlist" Pill Button */}
