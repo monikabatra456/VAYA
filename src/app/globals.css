@@ -177,24 +177,26 @@ html, body {
   position: absolute;
   left: 58vw;
   top: 62vh;
-  font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(30px, 3.8vw, 68px);
-  font-weight: 300;
-  color: var(--blue1);
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: clamp(2rem, 3.4vw, 3.6rem);
+  font-weight: 600;
+  color: #14264A;
+  letter-spacing: 0.01em;
   will-change: transform, opacity;
-  text-shadow: 0 0 28px rgba(253,248,236,0.75);
+  text-shadow: 0 2px 14px rgba(255, 255, 255, 0.55);
   white-space: nowrap;
 }
 .hero-tag2 {
   position: absolute;
   left: 58vw;
   top: calc(62vh + clamp(44px, 5vw, 90px));
-  font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(18px, 2vw, 34px);
-  font-weight: 300;
-  color: var(--blue2);
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: clamp(1.3rem, 2vw, 2.2rem);
+  font-weight: 500;
+  color: #3E6FB0;
+  letter-spacing: 0.01em;
   will-change: transform, opacity;
-  text-shadow: 0 0 28px rgba(253,248,236,0.75);
+  text-shadow: 0 2px 14px rgba(255, 255, 255, 0.55);
   white-space: nowrap;
 }
 
