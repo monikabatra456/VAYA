@@ -6,6 +6,7 @@ import Hero from '@/components/Hero';
 import WaitlistModal from '@/components/WaitlistModal';
 import Section2 from '@/components/section2/Section2';
 import WonderWorld from '@/components/wonder/WonderWorld';
+import MeetVaya from '@/components/MeetVaya';
 import ScrollManager from '@/components/ScrollManager';
 
 export default function Home() {
@@ -27,9 +28,11 @@ export default function Home() {
       {/* Section 3: The Wonder World */}
       <WonderWorld onWaitlist={() => setShowWaitlist(true)} />
 
+      {/* Section 4: Meet VAYA */}
+      <MeetVaya onWaitlist={() => setShowWaitlist(true)} />
+
       {/* Placeholder sections so scroll spy + nav work */}
-      <section id="meet-vaya"     style={{ height: "100svh", background: "#F7F2E7" }} />
-      <section id="on-its-way"    style={{ height: "100svh", background: "#F7F2E7" }} />
+      <section id="on-its-way" style={{ height: "100svh", background: "#F7F2E7" }} />
 
       {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </main>
