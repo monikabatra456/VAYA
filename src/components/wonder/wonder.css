@@ -172,7 +172,7 @@
 /* ── Header Area (Change 1: z-index 55 sits above stage area 10, smooth fade on zoom) ── */
 .ww-head {
   position: absolute;
-  top: calc(var(--header-h, 84px) + 12px);
+  top: calc(var(--header-h, 84px) + 12px - 4svh);
   left: 0;
   right: 0;
   width: 100%;
@@ -696,16 +696,30 @@
 
 .ww-hint {
   position: absolute;
-  left: 36px;
-  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 74px;
   font-family: var(--font-jakarta), sans-serif;
-  font-size: 12px;
-  color: #6B7280;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4B5563;
   pointer-events: none;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 46;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 @media (max-width: 960px) {
+  .ww-hint {
+    font-size: 12px;
+    bottom: 68px;
+  }
+}
+
+@media (max-width: 640px) {
   .ww-hint {
     display: none;
   }

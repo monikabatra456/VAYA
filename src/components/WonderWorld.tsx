@@ -182,8 +182,12 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     const headRect = headEl ? headEl.getBoundingClientRect() : null;
     const headSectionBottom = headRect ? headRect.bottom - rect.top : 210;
     // Ring top is cy - (globeR + 28). Required: (cy - globeR - 28) - headSectionBottom >= 44px
-    const minCyForClearance = Math.round(headSectionBottom + globeR + 28 + 44);
-    const cy = Math.max(minCyForClearance, Math.round(H * 0.535));
+    const cyOffset = Math.round(H * 0.07);
+    const minCyForClearance = Math.round(headSectionBottom + globeR + 28 + 20);
+    // Globe bottom edge stays at least 24px ABOVE the "Your wonder is waiting" pill (~H - 64px)
+    const maxCyForPill = H - 64 - globeR - 24;
+    const targetCy = Math.round(H * 0.535 - cyOffset);
+    const cy = Math.max(minCyForClearance, Math.min(targetCy, maxCyForPill));
 
     // Golden Orbit Ring & Card Orbit Ring: (cx, cy + 0.08R), rx = 1.95R, ry = 0.55R
     const goldenCx = cx;
@@ -562,7 +566,14 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const handleZoomIn = () => {
     setZoomLevel((prev) => {
       const next = Math.min(2.2, Number((prev + 0.3).toFixed(1)));
-      targetCamZ.current = 3.3 / next;
+      const newZ = 3.3 / next;
+      targetCamZ.current = newZ;
+      gsap.killTweensOf(currentCamZ);
+      gsap.to(currentCamZ, {
+        current: newZ,
+        duration: 0.4,
+        ease: 'power2.out',
+      });
       return next;
     });
   };
@@ -570,7 +581,14 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const handleZoomOut = () => {
     setZoomLevel((prev) => {
       const next = Math.max(1.0, Number((prev - 0.3).toFixed(1)));
-      targetCamZ.current = 3.3 / next;
+      const newZ = 3.3 / next;
+      targetCamZ.current = newZ;
+      gsap.killTweensOf(currentCamZ);
+      gsap.to(currentCamZ, {
+        current: newZ,
+        duration: 0.4,
+        ease: 'power2.out',
+      });
       return next;
     });
   };
@@ -579,6 +597,10 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const handleResetView = () => {
     setZoomLevel(1.0);
     targetCamZ.current = 3.3;
+
+    if (isRevealedRef.current) {
+      toggleIndiaReveal();
+    }
 
     gsap.killTweensOf(currentCamZ);
     gsap.to(currentCamZ, {
@@ -652,13 +674,18 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   };
 
   useEffect(() => {
-    if (!activeModal) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveModal(null);
+      if (e.key === 'Escape') {
+        if (activeModal) {
+          setActiveModal(null);
+        } else if (isRevealedRef.current) {
+          toggleIndiaReveal();
+        }
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activeModal]);
+  }, [activeModal, toggleIndiaReveal]);
 
   // ── Watermark Per-Letter Ripple Helpers (Change 2) ────────────────────────
   const checkWatermarkHover = useCallback((clientX: number, clientY: number) => {
@@ -1532,9 +1559,23 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       {/* Bottom Bar: Hint & Dark Navy Glass CTA Pill */}
       <footer className="ww-bottom-bar">
         <div className="ww-hint">
-          {isRevealed
-            ? 'Hover a card to pause & focus · Tap a card to explore · Tap India pin to close'
-            : 'Drag to spin · Ctrl + scroll or +/- to zoom · Tap India pin to explore'}
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ flexShrink: 0 }}
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <span>Drag to rotate &nbsp;•&nbsp; Scroll or use + / - to zoom &nbsp;•&nbsp; Tap a pin to explore</span>
         </div>
 
         {/* Dark Navy Glass CTA Pill */}
