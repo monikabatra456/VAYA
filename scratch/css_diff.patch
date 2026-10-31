@@ -1,0 +1,152 @@
+--- current
++++ line_518
+@@ -16,15 +16,16 @@
+   position: absolute;
+   top: 0;
+   left: 0;
+-  width: 280px;
+-  height: 90px;
++  right: 0;
++  height: 120px;
+   background: radial-gradient(
+-    ellipse at 40px 25px,
+-    rgba(255, 252, 245, 0.9) 0%,
+-    rgba(255, 250, 240, 0.45) 45%,
+-    transparent 80%
++    ellipse 580px 120px at 10% 0%,
++    rgba(255, 250, 242, 0.96) 0%,
++    rgba(255, 248, 238, 0.82) 40%,
++    rgba(250, 242, 230, 0.35) 70%,
++    transparent 100%
+   );
+-  z-index: 50;
++  z-index: 5;
+   pointer-events: none;
+ }
+ 
+@@ -122,20 +123,10 @@
+   margin-bottom: 22px;
+ }
+ 
+-.mv-headline-line-mask {
+-  display: block;
+-  overflow: hidden;
+-}
+-
+-.mv-headline-line {
+-  display: block;
+-  will-change: transform;
+-}
+-
+ .mv-word {
+   display: inline-block;
+   white-space: pre;
+-  will-change: transform, opacity;
++  will-change: transform, opacity, filter;
+ }
+ 
+ .mv-headline-gold {
+@@ -300,50 +291,45 @@
+   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+ }
+ 
+-/* Hand+phone image: ONE single image (hand holding phone with plain screen cutout) */
+-.mv-hand-phone-img {
++/* Hand back image (phone body, bezel, wrist, palm) */
++.mv-hand-back-img {
+   position: absolute;
+   inset: 0;
+   width: 100%;
+   height: 100%;
+   object-fit: fill;
+-  z-index: 5;
+-  pointer-events: none;
+-}
+-
+-/* ── SHOPIFY-STYLE SWIPING THUMB (ABOVE HAND+PHONE AND APP UI) ──────── */
+-.mv-thumb-wrapper {
+-  position: absolute;
+-  left: 39.95%;
+-  top: 48.76%;
+-  width: 21.97%; /* ~22% of phone body width */
+-  aspect-ratio: 757 / 1053;
+-  z-index: 25;
+-  pointer-events: none;
+-  transform-origin: bottom right;
+-  will-change: transform, opacity;
+-}
+-
+-/* Pre-made blurred dark ellipse shadow (NO filter: blur, NO filter: drop-shadow) */
+-.mv-thumb-shadow {
+-  position: absolute;
+-  top: 12%;
+-  left: -14%;
+-  width: 92%;
+-  height: 84%;
++  z-index: 2;
++  pointer-events: none;
++}
++
++/* ── ANIMATED THUMB IMG ──────────────────────────────────────────────── */
++/* Always opacity 1, resting along right edge like original hand-phone.png */
++.mv-thumb-img {
++  position: absolute;
++  inset: 0;
++  width: 100%;
++  height: 100%;
++  object-fit: fill;
++  z-index: 3;
++  pointer-events: none;
++  transform-origin: 59.342% 45.666%; /* 505 / 851 = 0.59342, 590 / 1292 = 0.45666 */
++  will-change: transform;
++  opacity: 1 !important;
++  filter: none !important; /* crisp photographic texture, no blur filter */
++}
++
++/* Contact shadow on screen under thumb tip */
++.mv-contact-shadow {
++  position: absolute;
++  z-index: 40;
++  pointer-events: none;
++  width: 22cqw;
++  height: 16cqw;
+   border-radius: 50%;
+-  background: radial-gradient(ellipse at center, rgba(10, 5, 2, 0.42) 0%, rgba(10, 5, 2, 0.18) 45%, transparent 75%);
+-  pointer-events: none;
+-  transform: rotate(-15deg);
+-}
+-
+-.mv-thumb-swipe-img {
+-  position: absolute;
+-  inset: 0;
+-  width: 100%;
+-  height: 100%;
+-  object-fit: contain;
+-  pointer-events: none;
++  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.15) 50%, transparent 75%);
++  filter: blur(4px);
++  transform: translate(-50%, -50%);
++  opacity: 0;
+ }
+ 
+ /* Touch ripple inside screen layer above content */
+@@ -351,14 +337,13 @@
+   position: absolute;
+   z-index: 50;
+   pointer-events: none;
+-  width: 26cqw;
+-  height: 26cqw;
++  width: 28cqw;
++  height: 28cqw;
+   border-radius: 50%;
+-  border: 2px solid rgba(255, 255, 255, 0.9);
+-  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.12) 45%, transparent 70%);
+-  transform: translate(-50%, -50%) scale(0.5);
++  border: 2px solid rgba(255, 255, 255, 0.85);
++  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
++  transform: translate(-50%, -50%) scale(0.4);
+   opacity: 0;
+-  will-change: transform, opacity;
+ }
+ 
+ /* ── PHONE SCREEN CONTAINER & COMPONENTS ────────────────────────────── */

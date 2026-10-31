@@ -1,7 +1,8 @@
 // src/components/ScrollManager.tsx
-// Native CSS scroll snapping handles post-hero section stops without wheel hijacking.
 "use client";
 
+import SmoothScroll from './motion/SmoothScroll';
+
 export default function ScrollManager() {
-  return null;
+  return <SmoothScroll />;
 }

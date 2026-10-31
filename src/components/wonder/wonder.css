@@ -242,6 +242,7 @@
   z-index: 10;
   overflow: visible;
   pointer-events: none;
+  background-color: #F6F1E7;
 }
 
 /* ── Soft Elliptical Ground Shadow under Globe (Bug 7: ~60% width, ~25% opacity, ~20-30px below bottom) ── */
@@ -314,6 +315,8 @@
   cursor: grab;
   touch-action: none;
   pointer-events: auto; /* Enables dragging / spinning the globe */
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
 .ww-canvas:active {

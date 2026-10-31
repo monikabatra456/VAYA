@@ -1,0 +1,549 @@
+/* src/components/meet/meet.css */
+
+/* ── MEET VAYA SECTION ─────────────────────────────────────────────── */
+.mv-section {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #1a110a;
+  user-select: none;
+}
+
+/* ── TOP AMBIENT BACKLIGHT: Soft luminous halo behind header logo ──── */
+.mv-seam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: radial-gradient(
+    ellipse 580px 120px at 10% 0%,
+    rgba(255, 250, 242, 0.96) 0%,
+    rgba(255, 248, 238, 0.82) 40%,
+    rgba(250, 242, 230, 0.35) 70%,
+    transparent 100%
+  );
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ── DIM OVERLAY FOR SECTION EXIT (opacity 0 -> 0.5, no blur) ──────── */
+.mv-dim-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: #000000;
+  opacity: 0;
+  z-index: 60;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* ── PLATE WRAPPER: object-fit cover for 1672x941 image ─────────────── */
+.mv-plate-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100vw, calc(100vh * 1672 / 941));
+  aspect-ratio: 1672 / 941;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.mv-plate-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 9;
+  pointer-events: none;
+}
+
+/* ── WINDOW SCENE (BEHIND WINDOW FRAME) ────────────────────────────── */
+.mv-window-scene-viewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.mv-window-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* ── WARM WINDOW BLOOM ──────────────────────────────────────────────── */
+.mv-window-bloom {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 45% 60% at 78% 45%, rgba(255, 190, 90, 0.22) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── LEFT GRADIENT OVERLAY for text legibility ──────────────────────── */
+.mv-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(20, 12, 7, 0.94) 0%, rgba(20, 12, 7, 0.78) 35%, transparent 58%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── LEFT COLUMN ─────────────────────────────────────────────────────── */
+.mv-left-col {
+  position: absolute;
+  left: 8vw;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 42vw;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Coming Soon top pill badge with pulsing dot */
+.mv-coming-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(242, 184, 75, 0.12);
+  border: 1px solid rgba(242, 184, 75, 0.35);
+  border-radius: 999px;
+  padding: 5px 14px;
+  margin-bottom: 20px;
+  width: fit-content;
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #f2b84b;
+  text-transform: uppercase;
+}
+
+.mv-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f2b84b;
+  box-shadow: 0 0 10px #f2b84b;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.65;
+  }
+}
+
+/* Headline with overflow-hidden line masks */
+.mv-headline {
+  font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  font-size: clamp(30px, 3.1vw, 54px);
+  font-weight: 500;
+  line-height: 1.18;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.mv-line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 3px;
+}
+
+.mv-line-inner {
+  display: block;
+  transform: translateY(110%);
+  will-change: transform;
+}
+
+.mv-headline-gold {
+  position: relative;
+  display: inline-block;
+  color: #f2b84b;
+  overflow: hidden;
+}
+
+/* One-time gold shimmer sweep (1.2s) */
+.mv-headline-gold.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    transparent 100%
+  );
+  animation: goldShimmerSweep 1.2s ease-out forwards;
+}
+
+@keyframes goldShimmerSweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Paragraph */
+.mv-paragraph {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: clamp(14px, 1.1vw, 18px);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 22px;
+  max-width: 92%;
+  will-change: transform, opacity;
+}
+
+/* Gold short divider line */
+.mv-gold-line {
+  width: 60px;
+  height: 2px;
+  background: #f2b84b;
+  margin-bottom: 24px;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* Dynamic Left State Caption */
+.mv-caption-box {
+  min-height: 54px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mv-state-caption {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  will-change: transform, opacity;
+}
+
+.mv-caption-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f2b84b;
+}
+
+.mv-caption-title {
+  font-size: clamp(15px, 1.2vw, 19px);
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Feature items row */
+.mv-features {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  will-change: transform, opacity;
+}
+
+.mv-feature-divider {
+  width: 1px;
+  background: rgba(242, 184, 75, 0.3);
+  align-self: stretch;
+  margin: 0 14px;
+}
+
+.mv-feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  flex: 1;
+  text-align: center;
+  cursor: default;
+  will-change: transform, opacity;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mv-feature-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(242, 184, 75, 0.08);
+  border: 1px solid rgba(242, 184, 75, 0.25);
+}
+
+.mv-feature-icon-wrap svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ffffff;
+}
+
+.mv-feature-label {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+/* Active feature style */
+.mv-feature-item.active {
+  background: rgba(242, 184, 75, 0.14);
+  border-color: rgba(242, 184, 75, 0.45);
+}
+
+.mv-feature-item.active .mv-feature-icon-wrap {
+  background: rgba(242, 184, 75, 0.24);
+  border-color: #f2b84b;
+}
+
+.mv-feature-item.active .mv-feature-icon-wrap svg {
+  stroke: #f2b84b;
+}
+
+.mv-feature-item.active .mv-feature-label {
+  color: #f2b84b;
+  font-weight: 600;
+}
+
+/* ── FLOATING GLASS CARDS (Shopify Editions style depth) ────────────── */
+.mv-floating-card {
+  position: absolute;
+  z-index: 25;
+  background: rgba(18, 26, 43, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.mv-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: rgba(242, 184, 75, 0.16);
+  border: 1px solid rgba(242, 184, 75, 0.3);
+  color: #f2b84b;
+}
+
+.mv-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.mv-card-value {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.mv-card-sub {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+/* Card individual placements */
+.mv-card-1 {
+  left: 45%;
+  top: 26%;
+}
+
+.mv-card-2 {
+  left: 88%;
+  top: 38%;
+}
+
+.mv-card-3 {
+  left: 48%;
+  top: 66%;
+}
+
+/* ── PHONE STAGE ─────────────────────────────────────────────────────── */
+.mv-phone-stage {
+  position: absolute;
+  aspect-ratio: 851 / 1292;
+  z-index: 12;
+  will-change: transform, opacity;
+  pointer-events: auto;
+}
+
+/* Screen layer sits under bezel */
+.mv-screen-layer {
+  position: absolute;
+  overflow: hidden;
+  background: #000000;
+  z-index: 1;
+  pointer-events: auto;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Hand back image (phone body, bezel, wrist, palm) */
+.mv-hand-back-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Always opacity 1 resting thumb along right edge */
+.mv-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 3;
+  pointer-events: none;
+  transform-origin: 59.342% 45.666%;
+  will-change: transform;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Contact shadow on screen under thumb tip */
+.mv-contact-shadow {
+  position: absolute;
+  z-index: 40;
+  pointer-events: none;
+  width: 22cqw;
+  height: 16cqw;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.15) 50%, transparent 75%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+/* Touch ripple inside screen layer above content */
+.mv-ripple {
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+  width: 28cqw;
+  height: 28cqw;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+}
+
+/* ── REDUCED MOTION ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .mv-phone-stage {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mv-window-bg {
+    transform: none !important;
+  }
+  .mv-thumb-img {
+    transform: none !important;
+  }
+  .mv-line-inner {
+    transform: none !important;
+  }
+  .mv-paragraph {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mv-features {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mv-floating-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ── RESPONSIVE MOBILE ADJUSTMENTS ──────────────────────────────────── */
+@media (max-width: 1024px) {
+  .mv-left-col {
+    left: 6vw;
+    max-width: 50vw;
+  }
+  .mv-card-1 { left: 40%; top: 22%; }
+  .mv-card-2 { left: 82%; top: 35%; }
+  .mv-card-3 { left: 42%; top: 70%; }
+}
+
+@media (max-width: 767px) {
+  .mv-left-col {
+    left: 5vw;
+    right: 5vw;
+    top: 14%;
+    transform: none;
+    max-width: 90vw;
+    z-index: 20;
+  }
+  .mv-headline {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+  .mv-paragraph {
+    font-size: 13px;
+    margin-bottom: 14px;
+    max-width: 100%;
+  }
+  .mv-features {
+    gap: 8px;
+  }
+  .mv-feature-divider {
+    margin: 0 4px;
+  }
+  .mv-feature-item {
+    padding: 6px 8px;
+  }
+  .mv-feature-icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+  .mv-feature-label {
+    font-size: 11px;
+  }
+  .mv-card-1, .mv-card-2, .mv-card-3 {
+    display: none;
+  }
+}

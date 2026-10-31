@@ -8,6 +8,8 @@ import Section2 from '@/components/section2/Section2';
 import WonderWorld from '@/components/wonder/WonderWorld';
 import MeetVaya from '@/components/MeetVaya';
 import ScrollManager from '@/components/ScrollManager';
+import OnItsWay from '@/components/on-its-way/OnItsWay';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const [showWaitlist, setShowWaitlist] = useState(false);
@@ -31,8 +33,11 @@ export default function Home() {
       {/* Section 4: Meet VAYA */}
       <MeetVaya onWaitlist={() => setShowWaitlist(true)} />
 
-      {/* Placeholder sections so scroll spy + nav work */}
-      <section id="on-its-way" style={{ height: "100svh", background: "#F7F2E7" }} />
+      {/* Section 5: On Its Way */}
+      <OnItsWay />
+
+      {/* Footer */}
+      <Footer />
 
       {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </main>

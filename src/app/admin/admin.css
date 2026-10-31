@@ -1,0 +1,138 @@
+/* src/app/admin/admin.css */
+/* Scoped tokens and styles for VAYA Admin Panel */
+
+.vaya-admin {
+  color-scheme: light;
+  --a-text: #0F1B33;
+  --a-text-2: #3F4A5E;
+  --a-text-3: #5B6577;
+  --a-placeholder: #6B7385;
+  --a-gold: #9A6420;
+  --a-navy: #14264A;
+  --a-pill-new-text: #8A4B00;
+  --a-pill-new-bg: #FCE8C8;
+  --a-pill-reviewed-text: #1F4E8C;
+  --a-pill-reviewed-bg: #DCEAFB;
+  --a-green: #167A3E;
+  --a-red: #B42318;
+  --a-border: #CDBFA8;
+  --a-border-subtle: #E6DCCD;
+  --a-bg: #F7F0E5;
+  --a-card-bg: #FAF4EA;
+  --a-focus-ring: #14264A;
+
+  color: var(--a-text);
+  background-color: var(--a-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reset any inherited dark mode or white text from landing page */
+.vaya-admin *,
+.vaya-admin *::before,
+.vaya-admin *::after {
+  box-sizing: border-box;
+}
+
+/* Inputs, selects, and textareas */
+.vaya-admin input,
+.vaya-admin select,
+.vaya-admin textarea {
+  color: var(--a-text) !important;
+  border: 1px solid var(--a-border) !important;
+  font-size: 14px !important;
+  background-color: #FAF4EA;
+}
+
+.vaya-admin input::placeholder,
+.vaya-admin textarea::placeholder {
+  color: var(--a-placeholder) !important;
+  opacity: 1 !important;
+}
+
+.vaya-admin input:focus,
+.vaya-admin select:focus,
+.vaya-admin textarea:focus,
+.vaya-admin button:focus-visible {
+  outline: 2px solid var(--a-focus-ring) !important;
+  outline-offset: 1px !important;
+}
+
+/* Buttons */
+.vaya-admin button {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.vaya-admin button:not(.btn-unstyled) {
+  border: 1px solid var(--a-border);
+}
+
+/* Headings and card titles */
+.vaya-admin h1,
+.vaya-admin h2,
+.vaya-admin h3 {
+  color: var(--a-text);
+}
+
+.vaya-admin .card-title {
+  color: var(--a-text);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Table styling */
+.vaya-admin table {
+  font-size: 14px;
+  color: var(--a-text);
+}
+
+.vaya-admin th {
+  color: var(--a-text-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.vaya-admin td {
+  color: var(--a-text);
+  font-size: 14px;
+}
+
+/* Labels and hints */
+.vaya-admin label {
+  color: var(--a-text-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.vaya-admin .text-hint {
+  color: var(--a-text-3);
+  font-size: 12px;
+}
+
+/* Status pills */
+.vaya-admin .pill-new {
+  color: var(--a-pill-new-text) !important;
+  background-color: var(--a-pill-new-bg) !important;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vaya-admin .pill-reviewed {
+  color: var(--a-pill-reviewed-text) !important;
+  background-color: var(--a-pill-reviewed-bg) !important;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

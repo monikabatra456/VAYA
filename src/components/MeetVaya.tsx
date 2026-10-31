@@ -1,680 +1,696 @@
-'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
-import { Playfair_Display, Outfit } from 'next/font/google';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './meet/meet.css';
-
-// Exact constants from specification
-const SCREEN = { left: 0.0369, top: 0.0193, width: 0.4949, height: 0.6744, radius: 0.1028 }; // fractions of hand-phone.png; radius is a fraction of the SCREEN WIDTH
-const THUMB = { aspect: 757/1053, heightOfScreen: 0.36, tip: { x: 0.174, y: 0.0 } };
-const PHONE_BOX = { left: '60.3%', top: '17.6%', width: '32.5%' }; // position of hand-phone.png inside the plate wrapper
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-playfair',
-});
-
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-outfit',
-});
-
-interface MeetVayaProps {
-  onWaitlist?: () => void;
-}
-
-const BAR_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const BAR_FINALS = [14, 17, 21, 26, 36, 48, 62]; // cqw heights
-
-export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const plateWrapRef = useRef<HTMLDivElement>(null);
-  const phoneStageRef = useRef<HTMLDivElement>(null);
-  const screenLayerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const thumbRef = useRef<HTMLImageElement>(null);
-  const rippleRef = useRef<HTMLDivElement>(null);
-  const comingSoonRef = useRef<HTMLDivElement>(null);
-
-  // Left column refs
-  const logoBlockRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const paragraphRef = useRef<HTMLParagraphElement>(null);
-  const goldLineRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-
-  // Feature items and bar elements
-  const featureItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const [activeFeature, setActiveFeature] = useState<number>(0);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    gsap.registerPlugin(ScrollTrigger);
-
-    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Feature items highlight helper
-    const updateActiveFeature = (idx: number) => {
-      setActiveFeature(idx);
-      featureItemRefs.current.forEach((el, i) => {
-        if (!el) return;
-        if (i === idx) {
-          el.classList.add('active');
-        } else {
-          el.classList.remove('active');
-        }
-      });
-    };
-
-    // If reduced motion is requested, display final state statically
-    if (isReduced) {
-      if (phoneStageRef.current) gsap.set(phoneStageRef.current, { yPercent: 0, rotation: 0, opacity: 1 });
-      if (comingSoonRef.current) gsap.set(comingSoonRef.current, { yPercent: 0, opacity: 1 });
-      featureItemRefs.current.forEach(el => el?.classList.add('active'));
-      return;
-    }
-
-    // Default active item initially
-    updateActiveFeature(0);
-
-    // Initial setups for left column and stage
-    gsap.set(phoneStageRef.current, { yPercent: 16, rotation: 3, opacity: 0 });
-    const leftItems = [logoBlockRef.current, headlineRef.current, paragraphRef.current, goldLineRef.current, featuresRef.current];
-    gsap.set(leftItems, { y: 24, opacity: 0 });
-
-    // Rest position coordinates (in % of phone stage)
-    // Thumb tip at 62% screen width, 108% screen height:
-    // tipX = 0.0369 + 0.62 * 0.4949 = 0.343738 (34.37%)
-    // tipY = 0.0193 + 1.08 * 0.6744 = 0.747652 (74.77%)
-    // thumb left = tipX - 0.174 * thumbWidth (~4.995%) = 29.38%
-    // thumb top = tipY = 74.77%
-    const REST_THUMB_X = 29.38;
-    const REST_THUMB_Y = 74.77;
-    const REST_TIP_X = 34.37;
-    const REST_TIP_Y = 74.77;
-
-    // Contact position coordinates (tip at 55% screen width, 88% screen height)
-    // tipX = 0.0369 + 0.55 * 0.4949 = 0.309095 (30.91%)
-    // tipY = 0.0193 + 0.88 * 0.6744 = 0.612772 (61.28%)
-    // thumb left = tipX - 4.995% = 25.91%
-    // thumb top = 61.28%
-    const CONTACT_THUMB_X = 25.91;
-    const CONTACT_THUMB_Y = 61.28;
-    const CONTACT_TIP_X = 30.91;
-    const CONTACT_TIP_Y = 61.28;
-
-    // Swipe 1 delta: thumb tip moves up 30% of screen height
-    // deltaY = -0.30 * 67.44% = -20.23%
-    const SWIPE1_THUMB_Y = CONTACT_THUMB_Y - 20.23;
-    const SWIPE1_TIP_Y = CONTACT_TIP_Y - 20.23;
-
-    // Swipe 2 delta: thumb moves up another 24% of screen height
-    // deltaY2 = -0.24 * 67.44% = -16.19%
-    const SWIPE2_THUMB_Y = SWIPE1_THUMB_Y - 16.19;
-    const SWIPE2_TIP_Y = SWIPE1_TIP_Y - 16.19;
-
-    // Set initial positions
-    gsap.set(thumbRef.current, {
-      left: `${REST_THUMB_X}%`,
-      top: `${REST_THUMB_Y}%`,
-      scale: 1,
-      opacity: 1,
-    });
-    gsap.set(rippleRef.current, {
-      left: `${REST_TIP_X}%`,
-      top: `${REST_TIP_Y}%`,
-      scale: 0.6,
-      opacity: 0,
-    });
-
-    // Idle life: floating animation for phone stage (+-3px, 4s sine)
-    const idleFloat = gsap.to(phoneStageRef.current, {
-      y: '+=6',
-      duration: 3.8,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true,
-      paused: false,
-    });
-
-    // Mouse tilt handler (up to 2deg)
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current || !phoneStageRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const nx = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-      const ny = (e.clientY - rect.top) / rect.height - 0.5;
-      gsap.to(phoneStageRef.current, {
-        rotateY: nx * 3.5,
-        rotateX: -ny * 3.5,
-        duration: 0.8,
-        ease: 'power2.out',
-      });
-    };
-    const sectionEl = sectionRef.current;
-    if (sectionEl) {
-      sectionEl.addEventListener('mousemove', handleMouseMove);
-    }
-
-    // Scroll range for inner page
-    // Inner height is ~215cqw, viewport is ~140cqw. Scroll range is approximately 68cqw.
-    // In CSS cqw, we can translate .inner by cqw using CSS transform.
-    const scrollRangeCqw = 68;
-
-    // Master Timeline with duration 1 (progress = timeline time)
-    const tl = gsap.timeline({
-      paused: true,
-      defaults: { ease: 'power2.inOut' },
-    });
-
-    // ── 0.00 - 0.12 ENTRANCE ─────────────────────────────────────
-    tl.to(phoneStageRef.current, {
-      yPercent: 0,
-      rotation: 0,
-      opacity: 1,
-      duration: 0.12,
-      ease: 'power3.out',
-    }, 0.00);
-
-    tl.to(leftItems, {
-      y: 0,
-      opacity: 1,
-      stagger: 0.015,
-      duration: 0.10,
-      ease: 'power3.out',
-    }, 0.02);
-
-    // Plate scales slowly 1.00 -> 1.05 across entire scroll
-    tl.to(plateWrapRef.current, {
-      scale: 1.05,
-      duration: 1.0,
-      ease: 'none',
-    }, 0.00);
-
-    // ── 0.12 - 0.30 HOME SCREEN VISIBLE ─────────────────────────
-    tl.call(() => updateActiveFeature(0), [], 0.12);
-
-    // ── 0.30 - 0.42 THUMB MOVES IN & PRESSES ───────────────────
-    tl.to(thumbRef.current, {
-      left: `${CONTACT_THUMB_X}%`,
-      top: `${CONTACT_THUMB_Y}%`,
-      scale: 0.96,
-      duration: 0.12,
-      ease: 'power2.out',
-    }, 0.30);
-
-    tl.to(rippleRef.current, {
-      left: `${CONTACT_TIP_X}%`,
-      top: `${CONTACT_TIP_Y}%`,
-      scale: 1.0,
-      opacity: 0.75,
-      duration: 0.12,
-      ease: 'power2.out',
-    }, 0.30);
-
-    // ── 0.42 - 0.60 SWIPE 1 ─────────────────────────────────────
-    tl.call(() => updateActiveFeature(1), [], 0.42);
-
-    // Thumb tip moves up 30% of screen height
-    tl.to(thumbRef.current, {
-      top: `${SWIPE1_THUMB_Y}%`,
-      duration: 0.18,
-      ease: 'power2.inOut',
-    }, 0.42);
-
-    tl.to(rippleRef.current, {
-      top: `${SWIPE1_TIP_Y}%`,
-      duration: 0.18,
-      ease: 'power2.inOut',
-    }, 0.42);
-
-    // .inner translates up 50% of scroll range
-    tl.to(innerRef.current, {
-      y: `-${scrollRangeCqw * 0.50}cqw`,
-      duration: 0.18,
-      ease: 'power2.inOut',
-    }, 0.42);
-
-    // Bars grow to final heights with 0.05 stagger
-    barRefs.current.forEach((barEl, i) => {
-      if (!barEl) return;
-      tl.to(barEl, {
-        height: `${BAR_FINALS[i]}cqw`,
-        duration: 0.14,
-        ease: 'power2.out',
-      }, 0.44 + i * 0.015);
-    });
-
-    // ── 0.60 - 0.68 HOLD ────────────────────────────────────────
-    // (hold position)
-
-    // ── 0.68 - 0.82 SWIPE 2 ─────────────────────────────────────
-    // Thumb moves up another 24% of screen height
-    tl.to(thumbRef.current, {
-      top: `${SWIPE2_THUMB_Y}%`,
-      duration: 0.14,
-      ease: 'power2.inOut',
-    }, 0.68);
-
-    tl.to(rippleRef.current, {
-      top: `${SWIPE2_TIP_Y}%`,
-      duration: 0.14,
-      ease: 'power2.inOut',
-    }, 0.68);
-
-    // .inner reaches full scroll range
-    tl.to(innerRef.current, {
-      y: `-${scrollRangeCqw}cqw`,
-      duration: 0.14,
-      ease: 'power2.inOut',
-    }, 0.68);
-
-    // ── 0.82 - 0.94 THUMB LIFTS & COMING-SOON SLIDES UP ─────────
-    tl.call(() => updateActiveFeature(2), [], 0.82);
-
-    // Thumb lifts away
-    tl.to(thumbRef.current, {
-      yPercent: 30,
-      opacity: 0,
-      duration: 0.10,
-      ease: 'power2.in',
-    }, 0.82);
-
-    tl.to(rippleRef.current, {
-      opacity: 0,
-      duration: 0.08,
-      ease: 'power2.in',
-    }, 0.82);
-
-    // Coming-soon overlay slides up
-    tl.to(comingSoonRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.12,
-      ease: 'power3.out',
-    }, 0.82);
-
-    // ── 0.94 - 1.00 HOLD ────────────────────────────────────────
-    // (holds until section unpins)
-
-    // ScrollTrigger creation
-    const st = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      pin: true,
-      start: 'top top',
-      end: '+=320%',
-      scrub: 0.6,
-      anticipatePin: 1,
-      animation: tl,
-      onUpdate: (self) => {
-        // Fallback feature highlight based on scroll progress
-        const p = self.progress;
-        if (p < 0.38) {
-          updateActiveFeature(0);
-        } else if (p < 0.80) {
-          updateActiveFeature(1);
-        } else {
-          updateActiveFeature(2);
-        }
-      },
-    });
-
-    return () => {
-      st.kill();
-      tl.kill();
-      idleFloat.kill();
-      if (sectionEl) {
-        sectionEl.removeEventListener('mousemove', handleMouseMove);
-      }
-    };
-  }, []);
-
-  return (
-    <section
-      id="meet-vaya"
-      ref={sectionRef}
-      className={`mv-section ${playfair.variable} ${outfit.variable}`}
-      aria-label="Meet VAYA"
-      suppressHydrationWarning
-    >
-      {/* Seam from previous section (Wonder World) */}
-      <div className="mv-seam" aria-hidden="true" />
-
-      {/* Plate wrapper centered */}
-      <div ref={plateWrapRef} className="mv-plate-wrapper">
-        {/* Airplane window plate image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/meet/plate.webp"
-          alt=""
-          className="mv-plate-img"
-          draggable={false}
-        />
-
-        {/* Soft warm light bloom around the window */}
-        <div className="mv-window-bloom" aria-hidden="true" />
-
-        {/* Left-to-right gradient overlay for text legibility */}
-        <div className="mv-gradient-overlay" aria-hidden="true" />
-
-        {/* ── LEFT COLUMN ──────────────────────────────────────────────── */}
-        <div className="mv-left-col">
-          {/* 1) VAYA logo block */}
-          <div ref={logoBlockRef} className="mv-logo-block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/meet/vaya-symbol.png"
-              alt="VAYA"
-              className="mv-logo-mark select-none"
-              draggable={false}
-            />
-            <span className="mv-logo-wordmark select-none">VAYA</span>
-            <div className="mv-tagline-row">
-              <span className="mv-tagline-line" aria-hidden="true" />
-              <span className="mv-logo-tagline">Stand In. Step Out.</span>
-              <span className="mv-tagline-line" aria-hidden="true" />
-            </div>
-          </div>
-
-          {/* 2) Headline */}
-          <h2 ref={headlineRef} className="mv-headline">
-            <span className="mv-headline-gold">VAYA</span> is an AI-powered travel intelligence platform designed to optimize trip planning and destination discovery.
-          </h2>
-
-          {/* 3) Paragraph */}
-          <p ref={paragraphRef} className="mv-paragraph">
-            It empowers travelers with crowd predictions, personalized recommendations, and data-driven travel insights.
-          </p>
-
-          {/* 4) Short gold line */}
-          <div ref={goldLineRef} className="mv-gold-line" aria-hidden="true" />
-
-          {/* 5) Feature items row */}
-          <div ref={featuresRef} className="mv-features">
-            {/* Feature 0 */}
-            <div
-              ref={(el) => { featureItemRefs.current[0] = el; }}
-              className={`mv-feature-item ${activeFeature === 0 ? 'active' : ''}`}
-              data-index="0"
-            >
-              <div className="mv-feature-icon-wrap" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <span className="mv-feature-label">Smarter Travel.</span>
-            </div>
-
-            <div className="mv-feature-divider" aria-hidden="true" />
-
-            {/* Feature 1 */}
-            <div
-              ref={(el) => { featureItemRefs.current[1] = el; }}
-              className={`mv-feature-item ${activeFeature === 1 ? 'active' : ''}`}
-              data-index="1"
-            >
-              <div className="mv-feature-icon-wrap" aria-hidden="true">
-                {/* 8-point compass star */}
-                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 14.5 9.5 22 12 14.5 14.5 12 22 9.5 14.5 2 12 9.5 9.5 12 2" />
-                </svg>
-              </div>
-              <span className="mv-feature-label">Data-Driven Decisions.</span>
-            </div>
-
-            <div className="mv-feature-divider" aria-hidden="true" />
-
-            {/* Feature 2 */}
-            <div
-              ref={(el) => { featureItemRefs.current[2] = el; }}
-              className={`mv-feature-item ${activeFeature === 2 ? 'active' : ''}`}
-              data-index="2"
-            >
-              <div className="mv-feature-icon-wrap" aria-hidden="true">
-                {/* Bar chart icon */}
-                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
-              </div>
-              <span className="mv-feature-label">Better Experiences.</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── PHONE STAGE ──────────────────────────────────────────────── */}
-        <div
-          ref={phoneStageRef}
-          className="mv-phone-stage"
-          style={{
-            left: PHONE_BOX.left,
-            top: PHONE_BOX.top,
-            width: PHONE_BOX.width,
-          }}
-        >
-          {/* Layer 1: Screen Layer */}
-          <div
-            ref={screenLayerRef}
-            className="mv-screen-layer"
-            style={{
-              left: `${SCREEN.left * 100}%`,
-              top: `${SCREEN.top * 100}%`,
-              width: `${SCREEN.width * 100}%`,
-              height: `${SCREEN.height * 100}%`,
-            }}
-          >
-            {/* Fixed Status Bar */}
-            <div className="mv-status-bar">
-              <span>9:41</span>
-              <div className="mv-status-icons" aria-hidden="true">
-                {/* Cellular Signal */}
-                <svg width="14" height="11" viewBox="0 0 14 11" fill="currentColor">
-                  <rect x="0" y="7" width="2" height="4" rx="0.5" />
-                  <rect x="4" y="5" width="2" height="6" rx="0.5" />
-                  <rect x="8" y="2.5" width="2" height="8.5" rx="0.5" />
-                  <rect x="12" y="0" width="2" height="11" rx="0.5" />
-                </svg>
-                {/* WiFi */}
-                <svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor">
-                  <path d="M6.5 7.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-3.5-3a5.5 5.5 0 0 1 7 0 .8.8 0 0 1-.2 1.1.8.8 0 0 1-1.1-.2 3.9 3.9 0 0 0-4.4 0 .8.8 0 0 1-1.1.2.8.8 0 0 1-.2-1.1zm-3-3a9.5 9.5 0 0 1 13 0 .8.8 0 0 1-.2 1.1.8.8 0 0 1-1.1-.2 7.9 7.9 0 0 0-10.4 0 .8.8 0 0 1-1.1.2.8.8 0 0 1-.2-1.1z" />
-                </svg>
-                {/* Battery */}
-                <svg width="18" height="9" viewBox="0 0 22 11" fill="currentColor">
-                  <rect x="0" y="0" width="19" height="11" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  <rect x="2" y="2" width="13" height="7" rx="1.5" />
-                  <path d="M20.5 4v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Preview Pill */}
-            <div className="mv-preview-pill">Preview – sample data</div>
-
-            {/* Inner Scrollable Page */}
-            <div ref={innerRef} className="mv-inner" style={{ height: '220cqw' }}>
-              {/* Header row inside inner */}
-              <div className="mv-app-header">
-                {/* Hamburger menu */}
-                <button type="button" className="mv-app-icon-btn" aria-label="Menu">
-                  <svg viewBox="0 0 24 24">
-                    <line x1="4" y1="7" x2="20" y2="7" />
-                    <line x1="4" y1="12" x2="20" y2="12" />
-                    <line x1="4" y1="17" x2="15" y2="17" />
-                  </svg>
-                </button>
-                {/* Center VAYA mark */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/meet/vaya-symbol.png"
-                  alt="VAYA"
-                  className="mv-app-logo-mark"
-                  draggable={false}
-                />
-                {/* Bell icon */}
-                <button type="button" className="mv-app-icon-btn" aria-label="Notifications">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Hero strip with snowy mountains */}
-              <div className="mv-hero-strip" aria-hidden="true" />
-
-              {/* Card 1: Where to next? */}
-              <div className="mv-card">
-                <div className="mv-card-title">Where to next?</div>
-                <div className="mv-search-field">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                  <span>Search cities, airports, or countries</span>
-                </div>
-              </div>
-
-              {/* Card 2: Crowd forecast */}
-              <div className="mv-card">
-                <div className="mv-crowd-title">Crowd forecast</div>
-                <div className="mv-crowd-subtitle">Expected airport crowds</div>
-
-                {/* 7 Vertical Bars */}
-                <div className="mv-bars-wrap">
-                  {BAR_DAYS.map((day, idx) => {
-                    const isWeekend = idx >= 5;
-                    return (
-                      <div key={day} className="mv-bar-col">
-                        <div
-                          ref={(el) => { barRefs.current[idx] = el; }}
-                          className={`mv-bar ${isWeekend ? 'active-bar' : ''}`}
-                          style={{ height: '6cqw' }}
-                        />
-                        <span className="mv-bar-label">{day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Lower crowds expected row */}
-                <div className="mv-lower-row">
-                  <svg viewBox="0 0 24 24" className="people-icon" aria-hidden="true">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  <div className="mv-lower-text">
-                    <span className="mv-lower-primary">Lower crowds expected</span>
-                    <span className="mv-lower-secondary">Tue, Thu, 6AM – 10AM</span>
-                  </div>
-                  <svg viewBox="0 0 24 24" className="mv-lower-chevron" aria-hidden="true">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </div>
-
-                {/* Plan my trip button */}
-                <button
-                  type="button"
-                  onClick={onWaitlist}
-                  className="mv-plan-btn"
-                >
-                  Plan my trip &rarr;
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Tab Bar (Fixed) */}
-            <div className="mv-tab-bar" aria-label="Bottom Navigation">
-              {/* Home */}
-              <div className="mv-tab-item active">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span className="mv-tab-label">Home</span>
-              </div>
-              {/* Trips */}
-              <div className="mv-tab-item">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                <span className="mv-tab-label">Trips</span>
-              </div>
-              {/* Explore */}
-              <div className="mv-tab-item">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-                </svg>
-                <span className="mv-tab-label">Explore</span>
-              </div>
-              {/* Profile */}
-              <div className="mv-tab-item">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                <span className="mv-tab-label">Profile</span>
-              </div>
-            </div>
-
-            {/* Coming-Soon Overlay (Fixed) */}
-            <div ref={comingSoonRef} className="mv-coming-soon">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/meet/vaya-symbol.png"
-                alt="VAYA"
-                className="mv-coming-soon-logo"
-                draggable={false}
-              />
-              <div className="mv-coming-soon-title">The VAYA app is coming soon</div>
-              <div className="mv-coming-soon-sub">Get early access when we launch.</div>
-              <button
-                type="button"
-                onClick={onWaitlist}
-                className="mv-coming-soon-btn"
-              >
-                Join Waitlist
-              </button>
-            </div>
-          </div>
-
-          {/* Layer 2: Hand Phone Image (Covers bezel, notch, dynamic island, hand) */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/meet/hand-phone.png"
-            alt=""
-            className="mv-hand-phone-img"
-            draggable={false}
-          />
-
-          {/* Layer 3: Thumb Image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={thumbRef}
-            src="/meet/thumb.png"
-            alt=""
-            className="mv-thumb-img"
-            draggable={false}
-          />
-
-          {/* Layer 4: Touch Ripple */}
-          <div ref={rippleRef} className="mv-ripple" aria-hidden="true" />
-        </div>
-      </div>
-    </section>
-  );
+'use client';
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Playfair_Display, Outfit } from 'next/font/google';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import MeetPhoneScreen from './meet/MeetPhoneScreen';
+import './meet/meet.css';
+
+export interface TapConfig {
+  t: number; // in seconds
+  x: number; // % of screen
+  y: number; // % of screen
+  label?: string;
+}
+
+// Tap times tuned to the baked button actions in each step
+export const TAPS: Record<number, TapConfig[]> = {
+  // Step 0: plan-trip video (~1.6s "Create My Trip")
+  0: [{ t: 1.6, x: 70, y: 79, label: 'Create My Trip' }],
+  // Step 1: itinerary video (~1.6s "Day 2", ~4.6s "Review changes", ~6.6s "Accept Itinerary")
+  1: [
+    { t: 1.6, x: 62, y: 28, label: 'Day 2' },
+    { t: 4.6, x: 70, y: 79, label: 'Review changes' },
+    { t: 6.6, x: 72, y: 81, label: 'Accept Itinerary' },
+  ],
+  // Step 2: crowd forecast (~1.8s "Plan my trip")
+  2: [{ t: 1.8, x: 68, y: 84, label: 'Plan my trip' }],
+};
+
+// Compute thumb reachability from base joint pivot (505, 590) on 851x1292 image
+export function isThumbReachable(xPct: number, yPct: number): boolean {
+  if (xPct < 48 || yPct < 25) return false;
+
+  const screenW = 388;
+  const screenH = 868;
+  const pivotX = 505 - 83; // 422px from screen left
+  const pivotY = 590 - 23; // 567px from screen top
+
+  const targetX = (xPct / 100) * screenW;
+  const targetY = (yPct / 100) * screenH;
+
+  const dx = targetX - pivotX;
+  const dy = targetY - pivotY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  return dist <= 340 && dist >= 100;
+}
+
+// Exact constants for hand-phone.png (851x1292) and screen hole
+const SCREEN = {
+  left: 0.0975, // 83 / 851
+  top: 0.0178,  // 23 / 1292
+  width: 0.4559, // 388 / 851
+  height: 0.6718, // 868 / 1292
+  radius: 0.116,
+};
+const PHONE_BOX = {
+  left: '56.94%', // 952 / 1672
+  top: '17.96%', // 169 / 941
+  width: '35.11%', // 587 / 1672
+};
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-playfair',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-outfit',
+});
+
+interface MeetVayaProps {
+  onWaitlist?: () => void;
+}
+
+const HEADLINE_WORDS = [
+  { text: 'VAYA', isGold: true },
+  { text: 'is' },
+  { text: 'an' },
+  { text: 'AI-powered' },
+  { text: 'travel' },
+  { text: 'intelligence' },
+  { text: 'platform' },
+  { text: 'designed' },
+  { text: 'to' },
+  { text: 'optimize' },
+  { text: 'trip' },
+  { text: 'planning' },
+  { text: 'and' },
+  { text: 'destination' },
+  { text: 'discovery.' },
+];
+
+export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const plateWrapRef = useRef<HTMLDivElement>(null);
+  const phoneStageRef = useRef<HTMLDivElement>(null);
+  const screenLayerRef = useRef<HTMLDivElement>(null);
+  const rippleRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLImageElement>(null);
+  const contactShadowRef = useRef<HTMLDivElement>(null);
+  const tapTweenRef = useRef<gsap.core.Timeline | null>(null);
+  const firedTapsRef = useRef<Set<number>>(new Set());
+  const prevTimeRef = useRef<number>(0);
+
+  // Left column refs
+  const goldLineRef = useRef<HTMLDivElement>(null);
+  const wordElsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const subtextLinesRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const shimmerTriggeredRef = useRef<boolean>(false);
+  const featureItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // 3 Steps: 0 = Smarter Travel, 1 = Data-Driven Decisions, 2 = Better Experiences
+  const [activeFeature, setActiveFeature] = useState<number>(0);
+  const [isSectionInView, setIsSectionInView] = useState<boolean>(true);
+
+  // Feature items highlight helper
+  const updateActiveFeature = (idx: number) => {
+    setActiveFeature(idx);
+    featureItemRefs.current.forEach((el, i) => {
+      if (!el) return;
+      if (i === idx) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
+  };
+
+  // Text Reveal Logic
+  const applyRevealProgress = useCallback((p: number) => {
+    const clampedP = Math.max(0, Math.min(1, p));
+    const n = HEADLINE_WORDS.length; // 15
+
+    // 1. Headline words reveal: translateY(24px) -> 0, opacity 0 -> 1 (no filter blur)
+    wordElsRef.current.forEach((el, i) => {
+      if (!el) return;
+      const start = 0.52 * (i / (n - 1));
+      const end = start + 0.20;
+      let wp = 0;
+      if (clampedP <= start) wp = 0;
+      else if (clampedP >= end) wp = 1;
+      else wp = (clampedP - start) / 0.20;
+
+      el.style.opacity = `${wp}`;
+      el.style.transform = `translateY(${24 * (1 - wp)}px)`;
+
+      // One-time gold shimmer sweep (1.2s) when "VAYA" completes (i=0, wp=1)
+      if (i === 0 && wp >= 0.99 && !shimmerTriggeredRef.current) {
+        shimmerTriggeredRef.current = true;
+        el.classList.add('shimmer');
+      }
+    });
+
+    // 2. Paragraph lines slide up (translateY 100% -> 0 inside mask) once headline completes (p >= 0.72)
+    const subProgress = Math.max(0, Math.min(1, (clampedP - 0.72) / 0.28));
+    subtextLinesRef.current.forEach((lineEl, idx) => {
+      if (!lineEl) return;
+      const lStart = idx === 0 ? 0 : 0.35;
+      const lEnd = idx === 0 ? 0.65 : 1.0;
+      let lp = 0;
+      if (subProgress <= lStart) lp = 0;
+      else if (subProgress >= lEnd) lp = 1;
+      else lp = (subProgress - lStart) / (lEnd - lStart);
+
+      lineEl.style.transform = `translateY(${(1 - lp) * 100}%)`;
+      lineEl.style.opacity = `${lp}`;
+    });
+
+    // 3. Gold divider line draws with scaleX 0 -> 1
+    if (goldLineRef.current) {
+      goldLineRef.current.style.transform = `scaleX(${subProgress})`;
+    }
+
+    // 4. The 3 pills enter with stagger
+    featureItemRefs.current.forEach((pillEl, idx) => {
+      if (!pillEl) return;
+      const pStart = 0.50 + idx * 0.15;
+      const pEnd = Math.min(1.0, pStart + 0.20);
+      let pp = 0;
+      if (subProgress <= pStart) pp = 0;
+      else if (subProgress >= pEnd) pp = 1;
+      else pp = (subProgress - pStart) / (pEnd - pStart);
+
+      pillEl.style.opacity = `${pp}`;
+      pillEl.style.transform = `translateY(${(1 - pp) * 16}px)`;
+    });
+  }, []);
+
+  // Observe section visibility to pause/resume videos
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSectionInView(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const triggerTap = (tap: TapConfig) => {
+    const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reachable = isThumbReachable(tap.x, tap.y);
+
+    if (rippleRef.current) {
+      gsap.set(rippleRef.current, {
+        left: `${tap.x}%`,
+        top: `${tap.y}%`,
+      });
+    }
+
+    if (contactShadowRef.current) {
+      gsap.set(contactShadowRef.current, {
+        left: `${tap.x}%`,
+        top: `${tap.y}%`,
+      });
+    }
+
+    // prefers-reduced-motion OR unreachable target: ripple only
+    if (isReduced || !reachable || !thumbRef.current) {
+      if (rippleRef.current) {
+        gsap.fromTo(
+          rippleRef.current,
+          { scale: 0.4, opacity: 0.65 },
+          { scale: 1.5, opacity: 0, duration: 0.45, ease: 'power2.out' }
+        );
+      }
+      return;
+    }
+
+    if (tapTweenRef.current) {
+      tapTweenRef.current.kill();
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Return exactly to rest pose (scale 1, rotate 0, translate 0)
+        if (thumbRef.current) {
+          gsap.set(thumbRef.current, { rotation: 0, x: 0, y: 0, scale: 1 });
+        }
+      },
+    });
+    tapTweenRef.current = tl;
+
+    // 1. Reach: 220ms ease-out (rotate about -34deg, translate -6px -4px, scale 1.04)
+    tl.to(thumbRef.current, {
+      rotation: -34,
+      x: -6,
+      y: -4,
+      scale: 1.04,
+      duration: 0.22,
+      ease: 'power2.out',
+    }, 0);
+
+    if (contactShadowRef.current) {
+      tl.fromTo(
+        contactShadowRef.current,
+        { opacity: 0, scale: 0.8 },
+        { opacity: 0.25, scale: 1.05, duration: 0.22, ease: 'power2.out' },
+        0
+      );
+    }
+
+    // 2. Press: 90ms (scale 0.98, translateY -2px) with ripple
+    tl.to(thumbRef.current, {
+      scale: 0.98,
+      y: -2,
+      duration: 0.09,
+      ease: 'power1.inOut',
+    }, 0.22);
+
+    if (contactShadowRef.current) {
+      tl.to(contactShadowRef.current, {
+        opacity: 0.35,
+        scale: 0.95,
+        duration: 0.09,
+        ease: 'power1.inOut',
+      }, 0.22);
+    }
+
+    tl.add(() => {
+      if (rippleRef.current) {
+        gsap.fromTo(
+          rippleRef.current,
+          { scale: 0.4, opacity: 0.65 },
+          { scale: 1.5, opacity: 0, duration: 0.42, ease: 'power2.out' }
+        );
+      }
+    }, 0.22);
+
+    // 3. Hold: 120ms (0.22 + 0.09 = 0.31s to 0.43s)
+
+    // 4. Return: 320ms ease-in-out back to rest (rotation 0, translate 0, scale 1.0)
+    tl.to(thumbRef.current, {
+      rotation: 0,
+      x: 0,
+      y: 0,
+      scale: 1.0,
+      duration: 0.32,
+      ease: 'power2.inOut',
+    }, 0.43);
+
+    if (contactShadowRef.current) {
+      tl.to(contactShadowRef.current, {
+        opacity: 0,
+        duration: 0.32,
+        ease: 'power2.inOut',
+      }, 0.43);
+    }
+  };
+
+  const handleVideoTimeUpdate = (step: number, currentTime: number) => {
+    if (!isSectionInView) return;
+    if (step !== activeFeature) return;
+
+    if (currentTime < prevTimeRef.current - 0.5 || currentTime < 0.25) {
+      firedTapsRef.current.clear();
+    }
+    prevTimeRef.current = currentTime;
+
+    const stepTaps = TAPS[step] || [];
+    stepTaps.forEach((tap, idx) => {
+      const triggerTime = Math.max(0, tap.t - 0.22);
+      if (currentTime >= triggerTime && currentTime <= tap.t + 0.4 && !firedTapsRef.current.has(idx)) {
+        firedTapsRef.current.add(idx);
+        triggerTap(tap);
+      }
+    });
+  };
+
+  // Handle active feature change & Step 2 tap
+  useEffect(() => {
+    firedTapsRef.current.clear();
+    prevTimeRef.current = 0;
+
+    if (activeFeature === 2 && isSectionInView) {
+      const step2Tap = TAPS[2]?.[0];
+      if (step2Tap) {
+        const timer = setTimeout(() => {
+          triggerTap(step2Tap);
+        }, 1800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [activeFeature, isSectionInView]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (isReduced) {
+      if (phoneStageRef.current) gsap.set(phoneStageRef.current, { yPercent: 0, rotation: 0, opacity: 1 });
+      featureItemRefs.current.forEach(el => el?.classList.add('active'));
+      applyRevealProgress(1);
+      return;
+    }
+
+    updateActiveFeature(0);
+
+    // Initial setups for phone stage
+    gsap.set(phoneStageRef.current, { yPercent: 16, rotation: 3, opacity: 0 });
+
+    // Idle life: floating animation for phone stage (+-3px, 3.8s sine)
+    const idleFloat = gsap.to(phoneStageRef.current, {
+      y: '+=6',
+      duration: 3.8,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+      paused: false,
+    });
+
+    // Mouse tilt handler (up to 3.5deg)
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!sectionRef.current || !phoneStageRef.current) return;
+      const r = sectionRef.current.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(phoneStageRef.current, {
+        rotateY: nx * 3.5,
+        rotateX: -ny * 3.5,
+        duration: 0.8,
+        ease: 'power2.out',
+      });
+    };
+    const sectionEl = sectionRef.current;
+    if (sectionEl) {
+      sectionEl.addEventListener('mousemove', handleMouseMove);
+    }
+
+    // ── ENTRY SCROLLTRIGGER: Text reveal scrub ─────────────────────────────
+    // Starts when section top reaches 85% of viewport height; completes when top reaches 0 (before pin).
+    const entryST = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top 85%',
+      end: 'top top',
+      scrub: true,
+      onUpdate: (self) => {
+        applyRevealProgress(self.progress);
+      },
+    });
+
+    // Check if entered without scrolling through (refresh at section, anchor link)
+    if (sectionRef.current) {
+      const bcr = sectionRef.current.getBoundingClientRect();
+      if (bcr.top <= 10 && bcr.bottom > 100) {
+        const autoObj = { p: 0 };
+        gsap.to(autoObj, {
+          p: 1,
+          duration: 1.4,
+          ease: 'power2.out',
+          onUpdate: () => applyRevealProgress(autoObj.p),
+        });
+      } else {
+        applyRevealProgress(entryST.progress);
+      }
+    }
+
+    // ── PINNED TIMELINE: 3-step interactive scroll (duration unchanged) ───
+    const tl = gsap.timeline({
+      paused: true,
+      defaults: { ease: 'power2.inOut' },
+    });
+
+    // Phone stage entrance
+    tl.to(phoneStageRef.current, {
+      yPercent: 0,
+      rotation: 0,
+      opacity: 1,
+      duration: 0.12,
+      ease: 'power3.out',
+    }, 0.00);
+
+    // Plate scales slowly 1.00 -> 1.05 across entire pinned scroll
+    tl.to(plateWrapRef.current, {
+      scale: 1.05,
+      duration: 1.0,
+      ease: 'none',
+    }, 0.00);
+
+    // 0.12 - 0.42: Step 0 Smarter Travel
+    tl.call(() => updateActiveFeature(0), [], 0.12);
+    // 0.42 - 0.72: Step 1 Data-Driven Decisions
+    tl.call(() => updateActiveFeature(1), [], 0.42);
+    // 0.72 - 1.00: Step 2 Better Experiences
+    tl.call(() => updateActiveFeature(2), [], 0.72);
+
+    // Text block exit: translateY 0 -> -30px and opacity 1 -> 0 when scrolling out of section
+    tl.to('.mv-left-col', {
+      y: -30,
+      opacity: 0,
+      duration: 0.12,
+      ease: 'power2.in',
+    }, 0.88);
+
+    // Pinned ScrollTrigger
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      pin: true,
+      start: 'top top',
+      end: '+=320%',
+      scrub: 0.6,
+      anticipatePin: 1,
+      animation: tl,
+      onUpdate: (self) => {
+        const p = self.progress;
+        if (p < 0.38) {
+          updateActiveFeature(0);
+        } else if (p < 0.72) {
+          updateActiveFeature(1);
+        } else {
+          updateActiveFeature(2);
+        }
+      },
+    });
+
+    return () => {
+      entryST.kill();
+      st.kill();
+      tl.kill();
+      idleFloat.kill();
+      if (tapTweenRef.current) tapTweenRef.current.kill();
+      if (sectionEl) {
+        sectionEl.removeEventListener('mousemove', handleMouseMove);
+      }
+    };
+  }, [applyRevealProgress]);
+
+  return (
+    <section
+      id="meet-vaya"
+      ref={sectionRef}
+      className={`mv-section ${playfair.variable} ${outfit.variable}`}
+      aria-label="Meet VAYA"
+      suppressHydrationWarning
+    >
+      {/* Refined ambient header backlight (makes logo crisp and visible, leaves window untinted) */}
+      <div className="mv-seam" aria-hidden="true" />
+
+      {/* Plate wrapper centered */}
+      <div ref={plateWrapRef} className="mv-plate-wrapper">
+        {/* ── WINDOW SCENE (BEHIND WINDOW FRAME) ────────────────────────────── */}
+        <div className="mv-window-scene-viewport" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/meet/alpine-clouds.webp"
+            alt=""
+            className="mv-window-bg"
+            draggable={false}
+          />
+        </div>
+
+        {/* Airplane window plate frame (cabin interior + transparent window cutout) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/meet/plate-frame.webp"
+          alt=""
+          className="mv-plate-img"
+          draggable={false}
+        />
+
+        {/* Soft warm light bloom around the window */}
+        <div className="mv-window-bloom" aria-hidden="true" />
+
+        {/* Left-to-right gradient overlay for text legibility */}
+        <div className="mv-gradient-overlay" aria-hidden="true" />
+
+        {/* ── LEFT COLUMN ──────────────────────────────────────────────── */}
+        <div className="mv-left-col">
+          {/* 1) Headline with word-by-word reveal */}
+          <h2 className="mv-headline">
+            {HEADLINE_WORDS.map((w, i) => (
+              <span
+                key={i}
+                ref={(el) => { wordElsRef.current[i] = el; }}
+                className={`mv-word ${w.isGold ? 'mv-headline-gold' : ''}`}
+              >
+                {w.text}{' '}
+              </span>
+            ))}
+          </h2>
+
+          {/* 2) Paragraph with line-by-line mask slide-up */}
+          <p className="mv-paragraph">
+            <span className="mv-subtext-line-mask">
+              <span
+                ref={(el) => { subtextLinesRef.current[0] = el; }}
+                className="mv-subtext-line"
+              >
+                It empowers travelers with crowd predictions,
+              </span>
+            </span>
+            <span className="mv-subtext-line-mask">
+              <span
+                ref={(el) => { subtextLinesRef.current[1] = el; }}
+                className="mv-subtext-line"
+              >
+                personalized recommendations, and data-driven travel insights.
+              </span>
+            </span>
+          </p>
+
+          {/* 3) Short gold line */}
+          <div ref={goldLineRef} className="mv-gold-line" aria-hidden="true" />
+
+          {/* 4) Feature items row */}
+          <div className="mv-features">
+            {/* Feature 0 */}
+            <div
+              ref={(el) => { featureItemRefs.current[0] = el; }}
+              className={`mv-feature-item ${activeFeature === 0 ? 'active' : ''}`}
+              data-index="0"
+              onClick={() => updateActiveFeature(0)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="mv-feature-icon-wrap" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <span className="mv-feature-label">Smarter Travel.</span>
+            </div>
+
+            <div className="mv-feature-divider" aria-hidden="true" />
+
+            {/* Feature 1 */}
+            <div
+              ref={(el) => { featureItemRefs.current[1] = el; }}
+              className={`mv-feature-item ${activeFeature === 1 ? 'active' : ''}`}
+              data-index="1"
+              onClick={() => updateActiveFeature(1)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="mv-feature-icon-wrap" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 14.5 9.5 22 12 14.5 14.5 12 22 9.5 14.5 2 12 9.5 9.5 12 2" />
+                </svg>
+              </div>
+              <span className="mv-feature-label">Data-Driven Decisions.</span>
+            </div>
+
+            <div className="mv-feature-divider" aria-hidden="true" />
+
+            {/* Feature 2 */}
+            <div
+              ref={(el) => { featureItemRefs.current[2] = el; }}
+              className={`mv-feature-item ${activeFeature === 2 ? 'active' : ''}`}
+              data-index="2"
+              onClick={() => updateActiveFeature(2)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="mv-feature-icon-wrap" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+              <span className="mv-feature-label">Better Experiences.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── PHONE STAGE ──────────────────────────────────────────────── */}
+        <div
+          ref={phoneStageRef}
+          className="mv-phone-stage"
+          style={{
+            left: PHONE_BOX.left,
+            top: PHONE_BOX.top,
+            width: PHONE_BOX.width,
+          }}
+        >
+          {/* Layer 1: Screen Layer with video-driven screen and rebuilt crowd forecast */}
+          <div
+            ref={screenLayerRef}
+            className="mv-screen-layer"
+            style={{
+              left: `${SCREEN.left * 100}%`,
+              top: `${SCREEN.top * 100}%`,
+              width: `${SCREEN.width * 100}%`,
+              height: `${SCREEN.height * 100}%`,
+              borderRadius: '9.8% / 4.4%',
+            }}
+          >
+            <MeetPhoneScreen
+              activeStep={activeFeature}
+              isSectionInView={isSectionInView}
+              onWaitlist={onWaitlist}
+              onVideoTimeUpdate={handleVideoTimeUpdate}
+            />
+
+            {/* Soft contact shadow on the screen under the tip */}
+            <div ref={contactShadowRef} className="mv-contact-shadow" aria-hidden="true" />
+
+            {/* Touch Ripple inside screen layer above content */}
+            <div ref={rippleRef} className="mv-ripple" aria-hidden="true" />
+          </div>
+
+          {/* Layer 2: Hand back (phone body, notch, left fingers, wrist, palm, repaired right bezel) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/meet/hand-back.png"
+            alt="Hand holding phone"
+            className="mv-hand-back-img"
+            draggable={false}
+          />
+
+          {/* Layer 3: Animated Thumb rotating about base joint over the screen (always opacity 1, exact rest pose) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={thumbRef}
+            src="/meet/thumb.png"
+            alt=""
+            className="mv-thumb-img"
+            draggable={false}
+          />
+        </div>
+      </div>
+    </section>
+  );
 }

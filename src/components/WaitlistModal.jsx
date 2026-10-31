@@ -39,8 +39,12 @@ export default function WaitlistModal({ onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, source: 'hero' }),
       });
-      if (res.ok) setStatus('success');
-      else throw new Error('server');
+      const data = await res.json().catch(() => ({}));
+      if (res.ok || data.alreadyJoined) {
+        setStatus('success');
+      } else {
+        throw new Error(data.error || 'server');
+      }
     } catch {
       setStatus('error');
     }
@@ -77,6 +81,17 @@ export default function WaitlistModal({ onClose }) {
             </p>
 
             <form onSubmit={handleSubmit} noValidate>
+              {/* Honeypot field for bot prevention */}
+              <input
+                type="text"
+                name="honeypot"
+                value={form.honeypot || ''}
+                onChange={handleChange}
+                style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
               <div className="wl-field">
                 <label htmlFor="wl-email">Email</label>
                 <input

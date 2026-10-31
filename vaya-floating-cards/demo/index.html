@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><title>VAYA floating cards demo</title>
+<link rel="stylesheet" href="floating-cards.css">
+<style>
+ html,body{margin:0;height:100%;font-family:Inter,system-ui,sans-serif;background:linear-gradient(#f9f1e3,#f3e6cf);color:#14213d}
+ .sec{display:grid;grid-template-columns:36% 64%;height:100vh;padding:0 4vw;box-sizing:border-box}
+ .txt{padding-top:12vh} .txt h1{font-size:3.2rem;line-height:1.05;margin:0 0 12px}
+ .wrap{padding:6vh 0 10vh}
+</style></head><body>
+<section class="sec"><div class="txt"><h1>Why travellers need VAYA</h1><p>Less stress. More moments.</p></div>
+<div class="wrap"><div class="fc-stage" id="stage">
+ <svg class="fc-lines" id="lines" aria-hidden="true"><path class="fc-spoke"/><path class="fc-spoke"/><path class="fc-spoke"/><path class="fc-spoke"/><path class="fc-spoke"/><path class="fc-spoke"/></svg>
+ <div class="fc-plane" id="plane"><svg viewBox="0 0 32 32"><path d="M30 16 3 4l5 12L3 28z" fill="#f08a2c"/><path d="M30 16 8 16 3 28z" fill="#d9731a"/></svg></div>
+</div></div></section>
+<script src="engine.js"></script>
+<script>
+const data=[["Overcrowding","Popular spots can get too crowded, ruining your trip.",1],["Local guides","Finding authentic and trusted local guides is often difficult.",2],["Changing plans","Unexpected weather, closures or schedule changes.",0],["Unreasonable prices","High prices, hidden costs and no transparency.",1],["Safety concerns","Unfamiliar places, scams, health risks and emergencies.",0],["Too much planning","It takes hours to research, compare and plan the trip.",2]];
+const stage=document.getElementById('stage');
+data.forEach(([t,d,dep])=>{const b=document.createElement('button');b.className='fc-card';b.dataset.depth=dep;
+ b.innerHTML=`<span class="fc-glow"></span><span class="fc-face"><span class="fc-icon">◎</span><span class="fc-body"><span class="fc-title">${t}</span><span class="fc-desc">${d}</span><span class="fc-pill">✦ How VAYA helps you • Tap to see</span></span><span class="fc-go">↗</span></span>`;
+ stage.appendChild(b);});
+window.__fc=new FloatingCardsEngine.FloatingCardsEngine({stage,svg:document.getElementById('lines'),plane:document.getElementById('plane'),cards:[...stage.querySelectorAll('.fc-card')]});
+</script></body></html>

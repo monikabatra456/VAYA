@@ -133,6 +133,15 @@ export default function Hero() {
       // End near vanishing point (62% x, 49% y), accounting for end scale 0.35
       planeEndX = W * 0.62 - planeW * 0.35 * 0.5;
       planeEndY = H * 0.49 - planeH * 0.35 * 0.5;
+
+      // Initialize hero plane's start position in gsap.set before first paint
+      if (planeRef.current) {
+        gsap.set(planeRef.current, {
+          x: planeStartX,
+          y: planeStartY,
+          force3D: true,
+        });
+      }
     }
     computeLayout();
 
@@ -290,6 +299,9 @@ export default function Hero() {
 
       // ─── Plane — ONE continuous sineInOut ease for everything ─────────────
       if (planeRef.current) {
+        if (planeRef.current.style.visibility !== "visible") {
+          planeRef.current.style.visibility = "visible";
+        }
         const pRise = clamp(p / C.PLANE_SCROLL_END, 0, 1);
         const pp    = flyEase(pRise); // same ease family
 
@@ -429,7 +441,7 @@ export default function Hero() {
         </div>
 
         {/* ── 4. PLANE (z40) ───────────────────────────────────────────────── */}
-        <div ref={planeRef} className="hero-plane" style={{ zIndex: Z.plane, opacity: 1 }}>
+        <div ref={planeRef} className="hero-plane" style={{ zIndex: Z.plane, visibility: "hidden", opacity: 0 }}>
           <img src={PLANE_SRC} alt="VAYA airliner" draggable={false}/>
           <div ref={contrailRef} className="hero-contrail"/>
         </div>

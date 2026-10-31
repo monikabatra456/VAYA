@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import TrackingProvider from "@/components/TrackingProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,11 +24,19 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@200;300;400;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@200;300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        {/* Preload Wonder World 3D Globe Earth textures to prevent black flash */}
+        <link rel="preload" as="image" href="/wonder/earth-4k.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/wonder/earth-2k.webp" type="image/webp" />
       </head>
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <TrackingProvider />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

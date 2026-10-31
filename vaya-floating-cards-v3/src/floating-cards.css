@@ -1,0 +1,194 @@
+/* VAYA – floating problem cards
+   Replace the colour variables with the site's real tokens (accent orange, charcoal, ivory). */
+.fc-stage {
+  --fc-accent: #f08a2c;
+  --fc-accent-2: #ffb46b;
+  --fc-accent-3: #ffd9ae;
+  --fc-ink: #14213d;
+  --fc-muted: #6b7280;
+  --fc-card-w: clamp(230px, 17vw, 330px);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  isolation: isolate;
+}
+
+/* Shopify depth layer: many empty, blurred, faint rectangles BEHIND the real cards (no text) */
+.fc-ghost {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10px 30px rgba(60, 40, 10, 0.05);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+.fc-ghost[data-layer='0'] { filter: blur(6px);  opacity: 0.3; } /* mid-back */
+.fc-ghost[data-layer='1'] { filter: blur(11px); opacity: 0.2; } /* far-back */
+
+/* dotted connector layer – always BELOW the cards */
+.fc-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
+.fc-spoke {
+  fill: none;
+  stroke: var(--fc-accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 0.1 10; /* round caps + 0.1 dash = perfect dots, even spacing */
+  opacity: 0;
+}
+
+/* plane – drawn pointing to +x, the engine moves/rotates it */
+.fc-plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 30;
+  pointer-events: none;
+  will-change: transform;
+}
+.fc-plane svg {
+  position: absolute;
+  left: -16px;
+  top: -16px;
+  width: 32px;
+  height: 32px;
+  overflow: visible;
+  filter: drop-shadow(0 3px 6px rgba(240, 138, 44, 0.35));
+}
+
+/* card wrapper – the engine writes `transform`; nothing here may transition transform */
+.fc-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--fc-card-w);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  z-index: 2;
+  container-type: inline-size; /* text scales with the card, so every card keeps the same proportions */
+  will-change: transform;
+  opacity: 0.5;
+  filter: blur(var(--fc-blur, 2px));
+  transition: opacity 0.55s ease, filter 0.55s ease;
+}
+.fc-card[data-depth='0'] { --fc-blur: 1px;   opacity: 0.64; }
+.fc-card[data-depth='1'] { --fc-blur: 1.4px; opacity: 0.58; }
+.fc-card[data-depth='2'] { --fc-blur: 2px;   opacity: 0.5; }
+.fc-card:focus-visible { outline: none; }
+.fc-card:focus-visible .fc-face { box-shadow: 0 0 0 2px var(--fc-accent); }
+
+.fc-card.is-active {
+  z-index: 10;
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* the face = the visible card (the glow sits BEHIND it as a sibling) */
+.fc-face {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 4cqw;
+  padding: 4.6cqw 5cqw;
+  border-radius: 5cqw;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 30px rgba(60, 40, 10, 0.06);
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.fc-card.is-active .fc-face {
+  background: #fff;
+  border-color: rgba(240, 138, 44, 0.5);
+  box-shadow: 0 18px 44px rgba(120, 70, 20, 0.14);
+}
+
+/* Shopify-style glow: SAME shape as the card, soft halo, element never rotates – only its colours move */
+@property --fc-ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.fc-glow {
+  position: absolute;
+  inset: -3px;
+  border-radius: calc(5cqw + 3px);
+  background: conic-gradient(from var(--fc-ang), #ff8a3d, #ffd2a1, #ffb067, #ff6b3d, #ffcf99, #ff8a3d);
+  filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: fc-ang 7s linear infinite;
+  pointer-events: none;
+}
+.fc-card.is-active .fc-glow { opacity: 0.85; }
+@keyframes fc-ang { to { --fc-ang: 360deg; } }
+
+.fc-icon {
+  flex: none;
+  width: 12cqw;
+  height: 12cqw;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f6ead7;
+  color: #a8651a;
+}
+.fc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.fc-title { font-weight: 700; font-size: clamp(13px, 4.6cqw, 17px); color: var(--fc-ink); }
+.fc-desc { font-size: clamp(11px, 3.5cqw, 13.5px); line-height: 1.35; color: var(--fc-muted); }
+.fc-pill {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: clamp(10px, 3.1cqw, 12px);
+  font-weight: 600;
+  color: #c0711f;
+  background: #fff3e3;
+  border: 1px solid #ffe0bd;
+}
+.fc-go {
+  flex: none;
+  width: 8.4cqw;
+  height: 8.4cqw;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  background: #eef0f3;
+  color: #6b7280;
+  transition: background 0.4s, color 0.4s;
+}
+.fc-card.is-active .fc-go { background: var(--fc-ink); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-glow { animation: none; }
+}
+
+/* <768px: engine is not started; plain stacked list */
+@media (max-width: 767px) {
+  .fc-stage { min-height: 0; display: grid; gap: 12px; }
+  .fc-lines, .fc-plane, .fc-ghost { display: none; }
+  .fc-card { position: relative; width: 100%; opacity: 1; filter: none; transform: none !important; }
+}
