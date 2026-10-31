@@ -137,15 +137,16 @@ export default function AdminLayoutClient({
           </div>
         </div>
 
-        {/* Left Sidebar */}
+        {/* Left Sidebar / Mobile Full-Screen Sheet */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#FAF4EA] border-r border-[#CDBFA8] p-6 flex flex-col justify-between transition-transform duration-200 md:static md:translate-x-0 ${
+          className={`fixed inset-0 z-50 w-full bg-[#FAF4EA] border-r border-[#CDBFA8] p-6 flex flex-col justify-between transition-transform duration-200 md:static md:w-64 md:translate-x-0 ${
             mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
           }`}
         >
           <div>
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-8">
+            {/* Logo & Mobile Close */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/vaya-logo-500.webp"
@@ -158,6 +159,15 @@ export default function AdminLayoutClient({
                   Admin Panel
                 </span>
               </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="md:hidden p-2 rounded-lg text-[#0F1B33] border border-[#CDBFA8] hover:bg-[#EFE7D8]"
+                aria-label="Close navigation"
+              >
+                <X size={20} />
+              </button>
             </div>
 
             {/* Navigation Links */}

@@ -90,7 +90,7 @@ export async function GET(req: Request) {
       .where('__name__', '<=', prevTo)
       .get();
 
-    // 5. Fetch waitlist submissions created in current period to calculate visitorsNotJoined
+    // 5. Fetch waitlist submissions created in current period
     const waitlistSnapshot = await adminDb
       .collection('waitlist_submissions')
       .where('createdDay', '>=', from)
@@ -100,50 +100,51 @@ export async function GET(req: Request) {
     // Current metrics
     const currentVisitorIds = new Set<string>();
     const currentReturningVisitorIds = new Set<string>();
+    visitorDaysSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const vid = data.visitorId;
+      if (vid) {
+        currentVisitorIds.add(vid);
+        if (data.isReturning) currentReturningVisitorIds.add(vid);
+      }
+    });
 
-    // Bucket map for time series
-    // Each bucket holds: { pageViews: number, signups: number, visitorIds: Set<string> }
+    let totalPageViews = 0;
+    let totalSignups = 0;
+
+    dailySnapshot.forEach((doc) => {
+      const data = doc.data();
+      totalPageViews += Number(data.pageViews || 0);
+      totalSignups += Number(data.signups || 0);
+    });
+
+    // Time-series bucketing by granularity
     const bucketMap = new Map<string, { pageViews: number; signups: number; visitorIds: Set<string> }>();
 
     visitorDaysSnapshot.forEach((doc) => {
       const data = doc.data();
-      const visitorId = data.visitorId;
       const day = data.day;
-      const isReturning = data.isReturning === true;
+      if (!day) return;
 
-      if (visitorId) {
-        currentVisitorIds.add(visitorId);
-        if (isReturning) {
-          currentReturningVisitorIds.add(visitorId);
-        }
-
-        // Determine bucket key
-        let bucketKey = day;
-        if (granularity === 'week') {
-          bucketKey = getWeekStartIST(parseISTStartOfDay(day));
-        } else if (granularity === 'month') {
-          bucketKey = day.slice(0, 7); // YYYY-MM
-        }
-
-        if (!bucketMap.has(bucketKey)) {
-          bucketMap.set(bucketKey, { pageViews: 0, signups: 0, visitorIds: new Set<string>() });
-        }
-        bucketMap.get(bucketKey)!.visitorIds.add(visitorId);
+      let bucketKey = day;
+      if (granularity === 'week') {
+        bucketKey = getWeekStartIST(parseISTStartOfDay(day));
+      } else if (granularity === 'month') {
+        bucketKey = getMonthKeyIST(parseISTStartOfDay(day));
       }
-    });
 
-    // Populate pageviews & signups from analytics_daily
-    let totalPageViews = 0;
-    let totalSignups = 0;
+      if (!bucketMap.has(bucketKey)) {
+        bucketMap.set(bucketKey, { pageViews: 0, signups: 0, visitorIds: new Set<string>() });
+      }
+      const b = bucketMap.get(bucketKey)!;
+      if (data.visitorId) b.visitorIds.add(data.visitorId);
+    });
 
     dailySnapshot.forEach((doc) => {
       const day = doc.id;
       const data = doc.data();
       const pv = Number(data.pageViews || 0);
       const su = Number(data.signups || 0);
-
-      totalPageViews += pv;
-      totalSignups += su;
 
       let bucketKey = day;
       if (granularity === 'week') {
@@ -177,10 +178,28 @@ export async function GET(req: Request) {
 
     // Calculate Waitlist Visitor IDs in range for visitorsNotJoined
     const waitlistVisitorIds = new Set<string>();
+    const problemCounts: Record<string, number> = {};
+    let travellerCount = 0;
+    let localGuideCount = 0;
+
     waitlistSnapshot.forEach((doc) => {
-      const vid = doc.data().visitorId;
+      const d = doc.data();
+      const vid = d.visitorId;
       if (vid) waitlistVisitorIds.add(vid);
+
+      const prob = d.biggestProblem || d.problem || 'Other';
+      problemCounts[prob] = (problemCounts[prob] || 0) + 1;
+
+      if (d.role === 'local_guide' || d.role === 'local-guide') {
+        localGuideCount += 1;
+      } else {
+        travellerCount += 1;
+      }
     });
+
+    const topProblems = Object.entries(problemCounts)
+      .map(([problem, count]) => ({ problem, count }))
+      .sort((a, b) => b.count - a.count);
 
     const totalVisitors = currentVisitorIds.size;
     const returningVisitors = currentReturningVisitorIds.size;
@@ -231,6 +250,12 @@ export async function GET(req: Request) {
         returningPercent: totalVisitors > 0 ? Math.round((returningVisitors / totalVisitors) * 100) : 0,
       },
       timeSeries,
+      topProblems,
+      roleSplit: {
+        traveller: travellerCount,
+        localGuide: localGuideCount,
+        total: travellerCount + localGuideCount,
+      },
     };
 
     // Store in cache

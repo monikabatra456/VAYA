@@ -6,11 +6,14 @@ import {
   Users,
   Eye,
   UserPlus,
-  UserMinus,
   TrendingUp,
   TrendingDown,
   ArrowRight,
   RotateCw,
+  Compass,
+  MapPin,
+  Check,
+  CheckCircle,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -47,6 +50,17 @@ interface TimeSeriesPoint {
   signups: number;
 }
 
+interface ProblemCount {
+  problem: string;
+  count: number;
+}
+
+interface RoleSplit {
+  traveller: number;
+  localGuide: number;
+  total: number;
+}
+
 export default function AdminOverviewPage() {
   const { dateRange } = useAdminContext();
 
@@ -55,6 +69,8 @@ export default function AdminOverviewPage() {
   const [kpis, setKpis] = useState<KpiData | null>(null);
   const [visitorActivity, setVisitorActivity] = useState<VisitorActivityData | null>(null);
   const [timeSeries, setTimeSeries] = useState<TimeSeriesPoint[]>([]);
+  const [topProblems, setTopProblems] = useState<ProblemCount[]>([]);
+  const [roleSplit, setRoleSplit] = useState<RoleSplit | null>(null);
   const [recentSignups, setRecentSignups] = useState<any[]>([]);
 
   // 1. Fetch Analytics data from Server API
@@ -69,6 +85,8 @@ export default function AdminOverviewPage() {
         setKpis(data.kpis);
         setVisitorActivity(data.visitorActivity);
         setTimeSeries(data.timeSeries || []);
+        setTopProblems(data.topProblems || []);
+        setRoleSplit(data.roleSplit || null);
       }
     } catch (err) {
       console.error('Failed to load analytics:', err);
@@ -99,10 +117,10 @@ export default function AdminOverviewPage() {
             const date = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
             list.push({
               id: doc.id,
-              name: d.name || 'Anonymous',
               email: d.email,
               role: d.role || 'traveller',
-              travelInterest: d.travelInterest || d.problem || 'General',
+              biggestProblem: d.biggestProblem || d.problem || '—',
+              consent: Boolean(d.consent),
               status: d.status || 'new',
               submittedOn: formatDisplayIST(date),
             });
@@ -119,6 +137,8 @@ export default function AdminOverviewPage() {
       console.warn('Realtime listener init:', err);
     }
   }, []);
+
+  const maxProblemCount = topProblems.length > 0 ? Math.max(...topProblems.map((p) => p.count), 1) : 1;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto text-[#0F1B33]">
@@ -184,7 +204,7 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-[#3F4A5E] uppercase tracking-wider">
               Waitlist Signups
             </span>
-            <div className="w-9 h-9 rounded-xl bg-[#F7F0E5] border border-[#CDBFA8] flex items-center justify-center text-[#9A6420]">
+            <div className="w-9 h-9 rounded-xl bg-[#F7F0E5] border border-[#CDBFA8] flex items-center justify-center text-[#167A3E]">
               <UserPlus size={18} />
             </div>
           </div>
@@ -212,194 +232,114 @@ export default function AdminOverviewPage() {
               Visitors Not Joined
             </span>
             <div className="w-9 h-9 rounded-xl bg-[#F7F0E5] border border-[#CDBFA8] flex items-center justify-center text-[#5B6577]">
-              <UserMinus size={18} />
+              <Users size={18} />
             </div>
           </div>
           <div className="text-3xl font-bold font-serif text-[#0F1B33]">
             {loading ? '—' : kpis?.visitorsNotJoined.value.toLocaleString() ?? 0}
           </div>
-          <div className="flex items-center gap-2 mt-2 text-xs text-[#5B6577]">
-            <span className="font-semibold text-[#0F1B33]">{kpis?.visitorsNotJoined.percent ?? 0}%</span>
-            <span>of total visitors</span>
+          <div className="mt-2 text-xs text-[#5B6577] font-medium">
+            <span className="font-semibold text-[#0F1B33]">
+              {kpis?.visitorsNotJoined.percent ?? 0}%
+            </span>{' '}
+            of total visitors
           </div>
         </div>
       </div>
 
-      {/* CHART & VISITOR ACTIVITY ROW */}
+      {/* TOP TRAVEL PROBLEMS & ROLE SPLIT SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart (2 cols) */}
+        {/* Top Travel Problems Bar List (2 cols) */}
         <div className="lg:col-span-2 bg-[#FAF4EA] border border-[#CDBFA8] rounded-2xl p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="font-serif font-bold text-lg text-[#0F1B33]">
-                Website Traffic & Growth
+                Top Travel Problems
               </h2>
               <p className="text-xs text-[#5B6577] mt-0.5 font-medium">
-                Comparison of Unique Visitors vs Total Page Views
+                Reported by waitlist subscribers in the selected date range
               </p>
             </div>
-
-            {/* Granularity Toggle */}
-            <div className="flex items-center bg-[#F7F0E5] border border-[#CDBFA8] rounded-xl p-1 self-start sm:self-auto">
-              {(['day', 'week', 'month'] as const).map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => setGranularity(g)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition border ${
-                    granularity === g
-                      ? 'bg-[#14264A] text-[#FFFFFF] border-[#14264A] shadow-sm'
-                      : 'text-[#3F4A5E] border-transparent hover:text-[#0F1B33]'
-                  }`}
-                >
-                  {g === 'day' ? 'Daily' : g === 'week' ? 'Weekly' : 'Monthly'}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Chart Display */}
-          <div className="h-72 w-full">
-            {loading ? (
-              <div className="h-full w-full flex items-center justify-center text-xs text-[#5B6577]">
-                <RotateCw className="animate-spin mr-2" size={16} /> Loading chart data…
-              </div>
-            ) : timeSeries.length === 0 ? (
-              <div className="h-full w-full flex flex-col items-center justify-center text-xs text-[#5B6577]">
-                No traffic recorded in this date range.
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="#CDBFA8" strokeDasharray="3 3" vertical={false} />
-                  <XAxis
-                    dataKey="key"
-                    stroke="#5B6577"
-                    fontSize={12}
-                    fontWeight={500}
-                    tickLine={false}
-                    axisLine={{ stroke: '#CDBFA8' }}
-                  />
-                  <YAxis
-                    stroke="#5B6577"
-                    fontSize={12}
-                    fontWeight={500}
-                    tickLine={false}
-                    axisLine={{ stroke: '#CDBFA8' }}
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#FAF4EA',
-                      borderColor: '#CDBFA8',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                    }}
-                    itemStyle={{ color: '#0F1B33', fontWeight: 500 }}
-                  />
-                  {/* Deep Navy: Line 1 (Visitors) */}
-                  <Line
-                    type="monotone"
-                    name="Visitors"
-                    dataKey="visitors"
-                    stroke="#14264A"
-                    strokeWidth={2.5}
-                    dot={{ fill: '#14264A', r: 3 }}
-                    activeDot={{ r: 6 }}
-                  />
-                  {/* Warm Gold: Line 2 (Page Views) */}
-                  <Line
-                    type="monotone"
-                    name="Page Views"
-                    dataKey="pageViews"
-                    stroke="#9A6420"
-                    strokeWidth={2}
-                    dot={{ fill: '#9A6420', r: 3 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          {/* Chart Legend */}
-          <div className="flex items-center justify-center gap-6 mt-4 pt-3 border-t border-[#CDBFA8] text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#14264A]" />
-              <span className="font-medium text-[#0F1B33]">Unique Visitors</span>
+          {loading ? (
+            <div className="py-12 flex justify-center text-xs text-[#5B6577]">
+              <RotateCw className="animate-spin text-[#9A6420]" size={20} />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#9A6420]" />
-              <span className="font-medium text-[#0F1B33]">Page Views</span>
+          ) : topProblems.length === 0 ? (
+            <div className="py-8 text-center text-xs text-[#5B6577]">
+              No problem reports recorded for this range.
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3.5">
+              {topProblems.map((item) => {
+                const pct = Math.round((item.count / maxProblemCount) * 100);
+                return (
+                  <div key={item.problem} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-[#0F1B33]">{item.problem}</span>
+                      <span className="text-[#14264A] font-mono">{item.count}</span>
+                    </div>
+                    <div className="w-full bg-[#EFE7D8] h-3 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-[#D97706] to-[#F59E0B] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(pct, 4)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Visitor Activity Card (1 col) */}
+        {/* Role Split (1 col) */}
         <div className="bg-[#FAF4EA] border border-[#CDBFA8] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <h2 className="font-serif font-bold text-lg text-[#0F1B33] mb-1">
-              Visitor Activity
+            <h2 className="font-serif font-bold text-lg text-[#0F1B33]">
+              Traveller vs Local Guide
             </h2>
-            <p className="text-xs text-[#5B6577] mb-6 font-medium">
-              New vs Returning traffic breakdown
+            <p className="text-xs text-[#5B6577] mt-0.5 font-medium">
+              Community breakdown
             </p>
 
-            <div className="space-y-5">
+            <div className="mt-6 space-y-4">
+              {/* Traveller stat */}
               <div className="p-4 bg-[#F7F0E5] border border-[#CDBFA8] rounded-xl flex items-center justify-between">
-                <div>
-                  <span className="block text-xs font-medium text-[#3F4A5E]">Total Visitors</span>
-                  <span className="text-2xl font-bold font-serif text-[#0F1B33]">
-                    {visitorActivity?.totalVisitors.toLocaleString() ?? 0}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#E0F2FE] text-[#0369A1] flex items-center justify-center">
+                    <Compass size={18} />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-semibold text-[#0F1B33]">Travellers</span>
+                    <span className="text-xs text-[#5B6577]">Exploring & planning</span>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-[#FAF4EA] border border-[#CDBFA8] flex items-center justify-center text-[#14264A]">
-                  <Users size={18} />
-                </div>
+                <span className="text-xl font-bold font-serif text-[#0F1B33]">
+                  {roleSplit?.traveller ?? 0}
+                </span>
               </div>
 
-              {/* Returning visitors percentage bar */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-[#0F1B33]">Returning Visitors</span>
-                  <span className="font-bold text-[#9A6420]">
-                    {visitorActivity?.returningPercent ?? 0}% ({visitorActivity?.returningVisitors ?? 0})
-                  </span>
+              {/* Local guide stat */}
+              <div className="p-4 bg-[#F7F0E5] border border-[#CDBFA8] rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] text-[#92400E] flex items-center justify-center">
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-semibold text-[#0F1B33]">Local Guides</span>
+                    <span className="text-xs text-[#5B6577]">Guiding & sharing</span>
+                  </div>
                 </div>
-                <div className="w-full h-3 bg-[#E6DCCD] rounded-full overflow-hidden flex">
-                  <div
-                    className="bg-[#9A6420] h-full transition-all duration-500"
-                    style={{ width: `${visitorActivity?.returningPercent ?? 0}%` }}
-                    title="Returning Visitors"
-                  />
-                  <div
-                    className="bg-[#14264A] h-full transition-all duration-500"
-                    style={{ width: `${100 - (visitorActivity?.returningPercent ?? 0)}%` }}
-                    title="New Visitors"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 bg-[#F7F0E5] border border-[#CDBFA8] rounded-xl">
-                  <span className="block text-xs font-medium text-[#3F4A5E]">New Visitors</span>
-                  <span className="text-lg font-bold text-[#0F1B33]">
-                    {visitorActivity?.newVisitors ?? 0}
-                  </span>
-                </div>
-                <div className="p-3 bg-[#F7F0E5] border border-[#CDBFA8] rounded-xl">
-                  <span className="block text-xs font-medium text-[#3F4A5E]">Returning</span>
-                  <span className="text-lg font-bold text-[#9A6420]">
-                    {visitorActivity?.returningVisitors ?? 0}
-                  </span>
-                </div>
+                <span className="text-xl font-bold font-serif text-[#9A6420]">
+                  {roleSplit?.localGuide ?? 0}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="pt-4 mt-6 border-t border-[#CDBFA8] text-xs font-medium text-[#5B6577] text-center">
-            Deduplicated daily per Asia/Kolkata (IST)
+          <div className="pt-4 mt-4 border-t border-[#CDBFA8] text-xs font-medium text-[#5B6577] text-center">
+            Total Co-Creators: {roleSplit?.total ?? 0}
           </div>
         </div>
       </div>
@@ -432,36 +372,58 @@ export default function AdminOverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-[#CDBFA8] text-[#5B6577] font-medium text-xs">
-                  <th className="pb-3 pl-2">Name</th>
-                  <th className="pb-3">Email</th>
-                  <th className="pb-3">Role</th>
-                  <th className="pb-3">Interest / Challenge</th>
-                  <th className="pb-3">Submitted On</th>
+                <tr className="border-b border-[#CDBFA8] text-[#3F4A5E] font-semibold text-xs uppercase tracking-wider">
+                  <th className="pb-3 pl-2">Email</th>
+                  <th className="pb-3 px-3">I am a</th>
+                  <th className="pb-3 px-3">Biggest Problem</th>
+                  <th className="pb-3 px-3 text-center">Consent</th>
+                  <th className="pb-3 px-3">Submitted On (IST)</th>
                   <th className="pb-3 pr-2">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E6DCCD]">
-                {recentSignups.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-[#F7F0E5] transition">
-                    <td className="py-3 pl-2 font-medium text-[#0F1B33]">{sub.name}</td>
-                    <td className="py-3 text-[#3F4A5E]">{sub.email}</td>
-                    <td className="py-3 capitalize text-[#3F4A5E]">{sub.role}</td>
-                    <td className="py-3 text-[#3F4A5E] capitalize">{sub.travelInterest}</td>
-                    <td className="py-3 text-[#5B6577]">{sub.submittedOn}</td>
-                    <td className="py-3 pr-2">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          sub.status === 'reviewed'
-                            ? 'bg-[#DCEAFB] text-[#1F4E8C]'
-                            : 'bg-[#FCE8C8] text-[#8A4B00]'
-                        }`}
-                      >
-                        {sub.status === 'reviewed' ? 'Reviewed' : 'New'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {recentSignups.map((sub) => {
+                  const isLocalGuide = sub.role === 'local_guide' || sub.role === 'local-guide';
+                  return (
+                    <tr key={sub.id} className="hover:bg-[#F7F0E5] transition">
+                      <td className="py-3 pl-2 font-medium text-[#0F1B33]">{sub.email}</td>
+                      <td className="py-3 px-3">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            isLocalGuide
+                              ? 'bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/30'
+                              : 'bg-[#E0F2FE] text-[#0369A1] border border-[#0284C7]/30'
+                          }`}
+                        >
+                          {isLocalGuide ? <MapPin size={11} /> : <Compass size={11} />}
+                          <span>{isLocalGuide ? 'Local guide' : 'Traveller'}</span>
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-[#3F4A5E] font-medium">{sub.biggestProblem}</td>
+                      <td className="py-3 px-3 text-center">
+                        {sub.consent ? (
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                        ) : (
+                          <span className="text-[#5B6577]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-[#5B6577] text-xs">{sub.submittedOn}</td>
+                      <td className="py-3 pr-2">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            sub.status === 'reviewed'
+                              ? 'bg-[#DCEAFB] text-[#1F4E8C]'
+                              : 'bg-[#FCE8C8] text-[#8A4B00]'
+                          }`}
+                        >
+                          {sub.status === 'reviewed' ? 'Reviewed' : 'New'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

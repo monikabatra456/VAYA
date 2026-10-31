@@ -20,7 +20,23 @@
       "collectionGroup": "waitlist_submissions",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "nameLower", "order": "ASCENDING" },
+        { "fieldPath": "role", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waitlist_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "biggestProblem", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waitlist_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "createdDay", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },

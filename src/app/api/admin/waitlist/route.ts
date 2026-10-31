@@ -15,6 +15,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const search = (searchParams.get('search') || '').trim();
     const status = searchParams.get('status') || 'all';
+    const role = searchParams.get('role') || 'all';
+    const problem = searchParams.get('problem') || 'all';
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     const limit = Math.min(parseInt(searchParams.get('limit') || '25', 10), 100);
@@ -27,6 +29,16 @@ export async function GET(req: Request) {
       query = query.where('status', '==', status);
     }
 
+    // Filter by role if not 'all'
+    if (role === 'traveller' || role === 'local_guide' || role === 'local-guide') {
+      query = query.where('role', '==', role);
+    }
+
+    // Filter by problem if not 'all'
+    if (problem !== 'all') {
+      query = query.where('biggestProblem', '==', problem);
+    }
+
     // Filter by date range (createdDay)
     if (from) {
       query = query.where('createdDay', '>=', from);
@@ -35,22 +47,12 @@ export async function GET(req: Request) {
       query = query.where('createdDay', '<=', to);
     }
 
-    // Search logic: detects @ for email, digits for phone, or name prefix
+    // Search logic: prefix search on emailLower
     if (search) {
       const searchLower = search.toLowerCase();
-      if (search.includes('@')) {
-        query = query
-          .where('emailLower', '>=', searchLower)
-          .where('emailLower', '<=', searchLower + '\uf8ff');
-      } else if (/^\d+$/.test(search)) {
-        query = query
-          .where('phoneDigits', '>=', search)
-          .where('phoneDigits', '<=', search + '\uf8ff');
-      } else {
-        query = query
-          .where('nameLower', '>=', searchLower)
-          .where('nameLower', '<=', searchLower + '\uf8ff');
-      }
+      query = query
+        .where('emailLower', '>=', searchLower)
+        .where('emailLower', '<=', searchLower + '\uf8ff');
     } else {
       // Default order: newest first
       query = query.orderBy('createdAt', 'desc');
@@ -73,13 +75,11 @@ export async function GET(req: Request) {
       const createdAtDate = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
       items.push({
         id: doc.id,
-        name: d.name || 'Anonymous',
         email: d.email,
-        phone: d.phone || '—',
+        emailLower: d.emailLower,
         role: d.role || 'traveller',
-        problem: d.problem || '—',
-        travelInterest: d.travelInterest || '—',
-        destination: d.destination || '—',
+        biggestProblem: d.biggestProblem || d.problem || '—',
+        consent: Boolean(d.consent),
         status: d.status || 'new',
         visitorId: d.visitorId || null,
         submittedOn: formatDisplayIST(createdAtDate),

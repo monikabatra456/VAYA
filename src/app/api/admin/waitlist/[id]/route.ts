@@ -49,17 +49,15 @@ export async function GET(
       ok: true,
       submission: {
         id: doc.id,
-        name: d.name,
         email: d.email,
-        phone: d.phone || '—',
+        emailLower: d.emailLower,
         role: d.role || 'traveller',
-        problem: d.problem || '—',
-        travelInterest: d.travelInterest || '—',
-        destination: d.destination || '—',
-        consent: d.consent ?? true,
-        source: d.source || 'hero',
+        biggestProblem: d.biggestProblem || d.problem || '—',
+        consent: Boolean(d.consent),
+        source: d.source || 'waitlist_modal',
         status: d.status || 'new',
         submittedOn: formatDisplayIST(createdAtDate),
+        visitorId: d.visitorId || null,
         visitor: visitorData,
       },
     });
@@ -98,6 +96,6 @@ export async function PATCH(
     return NextResponse.json({ ok: true, status });
   } catch (err: any) {
     console.error('[PATCH /api/admin/waitlist/[id]] Error:', err);
-    return NextResponse.json({ ok: false, error: 'Failed to update status' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }

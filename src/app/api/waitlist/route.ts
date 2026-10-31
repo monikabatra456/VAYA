@@ -31,16 +31,18 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-// Validation Schema
+import { VALID_PROBLEMS } from '@/lib/constants/waitlist';
+
+// Validation Schema matching Task 5
 const WaitlistSchema = z.object({
-  email: z.string().email().max(120),
-  name: z.string().min(2).max(80).optional(),
-  phone: z.string().max(20).optional(),
-  role: z.enum(['traveller', 'local-guide']).optional().default('traveller'),
-  problem: z.string().max(100).optional().default(''),
-  travelInterest: z.string().max(100).optional(),
-  destination: z.string().max(100).optional().default(''),
-  consent: z.boolean().optional().default(true),
+  email: z.string().email('Please enter a valid email address').max(120),
+  role: z.enum(['traveller', 'local_guide']).default('traveller'),
+  biggestProblem: z.enum(VALID_PROBLEMS, {
+    message: 'Please select your biggest travel problem',
+  }),
+  consent: z.literal(true, {
+    message: 'You must agree to receive updates from VAYA',
+  }),
   source: z.string().max(50).optional().default('hero'),
   honeypot: z.string().max(100).optional(),
 });
@@ -81,31 +83,19 @@ export async function POST(req: Request) {
     // Deterministic doc ID from sha256 of lowercase trimmed email
     const docId = crypto.createHash('sha256').update(emailLower).digest('hex');
 
-    const rawPhone = data.phone?.trim() || '';
-    const phoneDigits = rawPhone.replace(/\D/g, '');
-
-    const name = data.name?.trim() || emailLower.split('@')[0];
-    const nameLower = name.toLowerCase();
-
     const cookieStore = cookies();
     const visitorId = cookieStore.get('vaya_vid')?.value || null;
 
     const todayIST = getTodayIST();
 
     const submissionData = {
-      name,
-      nameLower,
       email: emailTrimmed,
       emailLower,
-      phone: rawPhone,
-      phoneDigits,
       role: data.role,
-      problem: data.problem,
-      travelInterest: data.travelInterest || data.problem || 'General',
-      destination: data.destination || '',
-      consent: data.consent,
-      source: data.source,
+      biggestProblem: data.biggestProblem,
+      consent: true,
       status: 'new' as const,
+      source: data.source,
       visitorId,
       createdDay: todayIST,
     };
@@ -125,7 +115,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         ok: true,
         alreadyJoined: true,
-        message: "You're already on the waitlist! We'll be in touch soon.",
+        message: "You're already on the waitlist! Welcome back.",
       });
     }
 

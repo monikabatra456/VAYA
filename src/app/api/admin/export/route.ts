@@ -7,7 +7,7 @@ import { getTodayIST, formatDisplayIST } from '@/lib/utils/date';
 /**
  * Protect against CSV injection by escaping cells starting with dangerous characters
  */
-function sanitizeCsvCell(val: string | number | null | undefined): string {
+function sanitizeCsvCell(val: string | number | boolean | null | undefined): string {
   if (val === null || val === undefined) return '""';
   let str = String(val).trim();
   // If string starts with =, +, -, @, prefix with a single quote
@@ -32,6 +32,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const search = (searchParams.get('search') || '').trim();
     const status = searchParams.get('status') || 'all';
+    const role = searchParams.get('role') || 'all';
+    const problem = searchParams.get('problem') || 'all';
     const from = searchParams.get('from');
     const to = searchParams.get('to');
 
@@ -39,6 +41,12 @@ export async function GET(req: Request) {
 
     if (status === 'new' || status === 'reviewed') {
       query = query.where('status', '==', status);
+    }
+    if (role === 'traveller' || role === 'local_guide' || role === 'local-guide') {
+      query = query.where('role', '==', role);
+    }
+    if (problem !== 'all') {
+      query = query.where('biggestProblem', '==', problem);
     }
     if (from) {
       query = query.where('createdDay', '>=', from);
@@ -49,13 +57,7 @@ export async function GET(req: Request) {
 
     if (search) {
       const searchLower = search.toLowerCase();
-      if (search.includes('@')) {
-        query = query.where('emailLower', '>=', searchLower).where('emailLower', '<=', searchLower + '\uf8ff');
-      } else if (/^\d+$/.test(search)) {
-        query = query.where('phoneDigits', '>=', search).where('phoneDigits', '<=', search + '\uf8ff');
-      } else {
-        query = query.where('nameLower', '>=', searchLower).where('nameLower', '<=', searchLower + '\uf8ff');
-      }
+      query = query.where('emailLower', '>=', searchLower).where('emailLower', '<=', searchLower + '\uf8ff');
     } else {
       query = query.orderBy('createdAt', 'desc');
     }
@@ -64,13 +66,10 @@ export async function GET(req: Request) {
     const filename = `vaya-waitlist-${todayIST}.csv`;
 
     const headers = [
-      'Name',
       'Email',
-      'Phone',
-      'Role',
-      'Travel Challenge',
-      'Travel Interest',
-      'Destination',
+      'I am a (Role)',
+      'Biggest Problem',
+      'Consent',
       'Status',
       'Submitted On (IST)',
       'Visitor ID',
@@ -107,26 +106,25 @@ export async function GET(req: Request) {
           snapshot.forEach((doc) => {
             const d = doc.data();
             const createdAtDate = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
+            const roleLabel = d.role === 'local_guide' || d.role === 'local-guide' ? 'Local guide' : 'Traveller';
+            const biggestProblem = d.biggestProblem || d.problem || '—';
+            const consentLabel = d.consent ? 'Yes' : 'No';
 
             const row = [
-              d.name || '',
               d.email || '',
-              d.phone || '',
-              d.role || 'traveller',
-              d.problem || '',
-              d.travelInterest || '',
-              d.destination || '',
-              d.status || 'new',
+              roleLabel,
+              biggestProblem,
+              consentLabel,
+              d.status === 'reviewed' ? 'Reviewed' : 'New',
               formatDisplayIST(createdAtDate),
               d.visitorId || '',
             ];
-
             chunk += row.map(sanitizeCsvCell).join(',') + '\r\n';
           });
 
           controller.enqueue(encoder.encode(chunk));
 
-          if (snapshot.docs.length < BATCH_SIZE) {
+          if (snapshot.size < BATCH_SIZE) {
             hasMore = false;
           } else {
             lastDoc = snapshot.docs[snapshot.docs.length - 1];
@@ -138,6 +136,7 @@ export async function GET(req: Request) {
     });
 
     return new Response(stream, {
+      status: 200,
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}"`,
@@ -146,7 +145,7 @@ export async function GET(req: Request) {
     });
   } catch (err: any) {
     console.error('[GET /api/admin/export] Error:', err);
-    return new Response(JSON.stringify({ error: 'Export failed' }), {
+    return new Response(JSON.stringify({ error: 'Failed to generate CSV export' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

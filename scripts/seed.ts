@@ -19,20 +19,30 @@ const app = !apps.length
 
 const db = getFirestore(app);
 
-const NAMES = [
-  'Aarav Sharma', 'Aditi Verma', 'Rohan Gupta', 'Priya Patel', 'Vikram Malhotra',
-  'Ananya Iyer', 'Kabir Mehta', 'Ishita Sen', 'Rahul Nair', 'Meera Rao',
-  'Dev Kapoor', 'Riya Desai', 'Siddharth Bose', 'Tanvi Joshi', 'Arjun Saxena',
-  'Neha Reddy', 'Karan Singhal', 'Pooja Bhatt', 'Manish Choudhury', 'Sneha Pillai',
-  'Varun Chopra', 'Deepika Menon', 'Akash Jain', 'Shreya Banerjee', 'Naveen Kulkarni',
-  'Kavita Agarwal', 'Sanjay Mishra', 'Anjali Nair', 'Gaurav Pandey', 'Divya Chauhan',
-  'Harsh Vardhan', 'Bhavna Tiwari', 'Abhishek Das', 'Swati Mukherjee', 'Rajesh Goel',
-  'Alisha Merchant', 'Mohit Rawat', 'Sunita Sundaram', 'Vishal Nambiar', 'Tara Bhatnagar'
+const EMAILS = [
+  'aarav.sharma@example.com', 'aditi.verma@example.com', 'rohan.gupta@example.com', 'priya.patel@example.com',
+  'vikram.malhotra@example.com', 'ananya.iyer@example.com', 'kabir.mehta@example.com', 'ishita.sen@example.com',
+  'rahul.nair@example.com', 'meera.rao@example.com', 'dev.kapoor@example.com', 'riya.desai@example.com',
+  'siddharth.bose@example.com', 'tanvi.joshi@example.com', 'arjun.saxena@example.com', 'neha.reddy@example.com',
+  'karan.singhal@example.com', 'pooja.bhatt@example.com', 'manish.choudhury@example.com', 'sneha.pillai@example.com',
+  'varun.chopra@example.com', 'deepika.menon@example.com', 'akash.jain@example.com', 'shreya.banerjee@example.com',
+  'naveen.kulkarni@example.com', 'kavita.agarwal@example.com', 'sanjay.mishra@example.com', 'anjali.nair@example.com',
+  'gaurav.pandey@example.com', 'divya.chauhan@example.com', 'harsh.vardhan@example.com', 'bhavna.tiwari@example.com',
+  'abhishek.das@example.com', 'swati.mukherjee@example.com', 'rajesh.goel@example.com', 'alisha.merchant@example.com',
+  'mohit.rawat@example.com', 'sunita.sundaram@example.com', 'vishal.nambiar@example.com', 'tara.bhatnagar@example.com'
 ];
 
-const ROLES = ['traveller', 'local-guide'];
-const PROBLEMS = ['crowds', 'prices', 'safety', 'planning'];
-const DESTINATIONS = ['Goa', 'Kashmir', 'Ladakh', 'Kerala', 'Jaipur', 'Varanasi', 'Himachal', 'Andaman', 'Udaipur'];
+const ROLES = ['traveller', 'local_guide'] as const;
+const PROBLEMS = [
+  'Overcrowding',
+  'Unreasonable prices',
+  'Finding local guides',
+  'Changing plans',
+  'Safety concerns',
+  'Too much planning',
+  'Other',
+] as const;
+
 const DEVICES = ['mobile', 'desktop', 'tablet'] as const;
 const REFERRERS = ['https://instagram.com', 'https://google.com', 'https://twitter.com', 'Direct', 'https://linkedin.com'];
 
@@ -117,13 +127,12 @@ async function runSeed() {
 
   console.log(`Successfully created ${totalVisitsCreated} visits across 30 days.`);
 
-  // 2. Generate 40 Waitlist Submissions
+  // 2. Generate 40 Waitlist Submissions with updated schema
   console.log('Generating 40 waitlist submissions…');
   const submissionBatch = db.batch();
 
-  for (let s = 0; s < NAMES.length; s++) {
-    const name = NAMES[s];
-    const email = `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`;
+  for (let s = 0; s < EMAILS.length; s++) {
+    const email = EMAILS[s];
     const emailLower = email.toLowerCase();
     const docId = crypto.createHash('sha256').update(emailLower).digest('hex');
 
@@ -135,19 +144,14 @@ async function runSeed() {
 
     const subRef = db.collection('waitlist_submissions').doc(docId);
     submissionBatch.set(subRef, {
-      name,
-      nameLower: name.toLowerCase(),
       email,
       emailLower,
-      phone: `+91 98${Math.floor(10000000 + Math.random() * 90000000)}`,
-      phoneDigits: `98${Math.floor(10000000 + Math.random() * 90000000)}`,
       role: ROLES[s % ROLES.length],
-      problem: PROBLEMS[s % PROBLEMS.length],
-      travelInterest: PROBLEMS[s % PROBLEMS.length],
-      destination: DESTINATIONS[s % DESTINATIONS.length],
+      biggestProblem: PROBLEMS[s % PROBLEMS.length],
       consent: true,
       status: s % 3 === 0 ? 'reviewed' : 'new',
       visitorId: linkedVid,
+      source: 'waitlist_modal',
       createdAt: Timestamp.fromDate(subDate),
       createdDay: dayStr,
       isSeed: true,
