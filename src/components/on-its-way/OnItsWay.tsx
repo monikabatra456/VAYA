@@ -84,7 +84,7 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
     const init = async () => {
       // Await plane image decode (img.decode()) and document.fonts.ready
       const img = new window.Image();
-      img.src = '/plane-real.png';
+      img.src = '/plane-vaya.png';
       try {
         await Promise.all([
           img.decode ? img.decode().catch(() => {}) : Promise.resolve(),
@@ -149,7 +149,7 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
       <div ref={bgRef} className={styles.backgroundWrapper} aria-hidden="true">
         <picture>
           <source
-            media="(max-width: 768px)"
+            media="(max-width: 1023px)"
             srcSet="/assets/on-its-way/bg-sky-mountains-mobile.webp"
           />
           <Image
@@ -245,7 +245,7 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
 
             {/* Plane Real Image with next/image - transparent cutout */}
             <Image
-              src="/plane-real.png"
+              src="/plane-vaya.png"
               alt="VAYA airliner"
               width={1600}
               height={561}

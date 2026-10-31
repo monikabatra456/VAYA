@@ -10,7 +10,7 @@ export const VIEWBOX = `0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`;
  * making ONE loop-the-loop (around x~410, y~445), sweeping right and rising to the airplane tail (~x 905, y 503).
  */
 export const FLIGHT_PATH_D =
-  'M -20 428 C 80 418, 200 440, 300 495 C 380 530, 440 480, 452 445 C 462 405, 385 395, 372 440 C 360 480, 410 520, 520 540 C 640 556, 800 530, 905 503';
+  'M -40 680 C 200 660, 460 610, 640 560 C 750 528, 830 508, 905 503';
 
 /**
  * Hand-drawn swoosh underline running under "Way"
@@ -25,7 +25,7 @@ export const SWOOSH_PATH_D =
 export const RESTING_PLANE = {
   x: 905,
   y: 503,
-  rotation: 6,
+  rotation: 2,
 };
 
 /**
@@ -33,8 +33,8 @@ export const RESTING_PLANE = {
  * Fuselage tail is at ~3.0% from left, ~78.0% from top.
  */
 export const PLANE_ANCHOR = {
-  xPct: 3.0,
-  yPct: 78.0,
+  xPct: 18.0,
+  yPct: 68.0,
 };
 
 /**

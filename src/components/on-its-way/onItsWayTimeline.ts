@@ -321,8 +321,8 @@ export function createOnItsWayTimeline(
       flightProgress,
       {
         value: 1,
-        duration: 5.5,
-        ease: 'sine.inOut',
+        duration: 6.0,
+        ease: 'power1.inOut',
         onStart: () => {
           planeWrapper.style.willChange = 'transform';
           gsap.set(planeWrapper, { opacity: 1 });
@@ -333,38 +333,18 @@ export function createOnItsWayTimeline(
           const pt = flightPath.getPointAtLength(currentDist);
           const pixelPos = getSvgPointInContainer(pt.x, pt.y, svg, container);
 
-          // Tangent calculation: sample slightly ahead and behind
-          const lookAhead = Math.min(flightLength, currentDist + 4);
-          const lookBehind = Math.max(0, currentDist - 4);
-          const ptAhead = flightPath.getPointAtLength(lookAhead);
-          const ptBehind = flightPath.getPointAtLength(lookBehind);
-          const dx = ptAhead.x - ptBehind.x;
-          const dy = ptAhead.y - ptBehind.y;
-          const rawAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-          // Target angle clamped to [rest - 14deg, rest + 10deg] = [-8deg, +16deg]
-          const targetAngle = Math.max(MIN_ROT, Math.min(MAX_ROT, REST_ROT + rawAngle));
-
-          // Lerp each tick: angle += (target - angle) * 0.12
-          currentAngle += (targetAngle - currentAngle) * 0.12;
-
-          // Ease to rest value in the last 0.6s of the 5.5s tween
-          const remaining = (1 - progress) * 5.5;
-          let displayAngle = currentAngle;
-          if (remaining < 0.6) {
-            const easeFactor = Math.min(1, Math.max(0, (0.6 - remaining) / 0.6));
-            displayAngle = currentAngle + (REST_ROT - currentAngle) * easeFactor;
-          }
+          // Animate rotation gently from +8deg (climbing) to +2deg (leveling off) across the 6s
+          const rotationAngle = 8 - 6 * progress;
 
           // Transform only: x, y, rotation (force3D: true)
           gsap.set(planeWrapper, {
             x: pixelPos.x,
             y: pixelPos.y,
-            rotation: displayAngle,
+            rotation: rotationAngle,
             force3D: true,
           });
 
-          // Reveal dashed trail via mask stroke-dashoffset
+          // Reveal dashed trail via mask stroke-dashoffset smoothly
           const offset = flightLength * (1 - progress);
           maskPath.style.strokeDashoffset = `${offset.toFixed(2)}`;
         },
@@ -383,11 +363,12 @@ export function createOnItsWayTimeline(
           });
           maskPath.style.strokeDashoffset = '0';
 
-          // After landing: tiny float only (+-3px, 7s round trip, sine.inOut, yoyo). No other motion.
+          // After landing: continuous float (+-3px, 9s round trip cycle, sine.inOut) and tiny breathing scale (1 to 1.01)
           if (planeFloat) {
             idleFloatAnim = gsap.to(planeFloat, {
               y: 3,
-              duration: 3.5,
+              scale: 1.01,
+              duration: 4.5,
               ease: 'sine.inOut',
               yoyo: true,
               repeat: -1,
