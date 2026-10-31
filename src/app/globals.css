@@ -4,6 +4,10 @@
 
 /* ── Brand tokens ────────────────────────────────────────────────────────── */
 :root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
   --logo-h: clamp(64px, 4.6vw, 84px);
   --header-h: calc(var(--logo-h) + 28px);
   --nav-safe: 110px;
@@ -564,7 +568,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 2px 0;
+  padding: 3px 0;
   text-align: left;
 }
 .nav-rail-slot .vaya-nav-dot {
@@ -579,9 +583,9 @@ html, body {
   transition: all 0.25s ease;
 }
 .nav-rail-slot .vaya-nav-btn[data-active="true"] .vaya-nav-dot {
-  background: #c8782a;
-  border-color: #c8782a;
-  box-shadow: 0 0 0 3px rgba(200, 120, 42, 0.25);
+  background: #f2b84b;
+  border-color: #f2b84b;
+  box-shadow: 0 0 0 3px rgba(242, 184, 75, 0.3);
 }
 .nav-rail-slot .vaya-nav-roman {
   display: inline-block !important;
@@ -589,51 +593,122 @@ html, body {
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: rgba(20, 33, 61, 0.55);
   min-width: 16px;
   transition: color 0.22s, font-weight 0.22s;
 }
 .nav-rail-slot .vaya-nav-btn[data-active="true"] .vaya-nav-roman {
   color: #14213d;
-  font-weight: 600;
+  font-weight: 700;
 }
 .nav-rail-slot .vaya-nav-label {
   display: inline-block;
   font-family: var(--font-jakarta);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
   white-space: nowrap;
   color: #14213d;
   opacity: 0;
-  transform: translateX(-6px);
+  transform: translateX(-4px);
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease, color 0.22s ease;
 }
+/* Active item: always show active name + bold label */
 .nav-rail-slot .vaya-nav-btn[data-active="true"] .vaya-nav-label {
-  opacity: 1;
+  opacity: 1 !important;
+  font-weight: 700;
   transform: translateX(0);
-  pointer-events: none;
 }
-.nav-rail-slot .vaya-nav-btn[data-nav-id="wonder"][data-active="true"] .vaya-nav-label {
-  opacity: var(--nav-label-on-wonder, 0) !important;
-  transition: opacity 0.3s ease;
-}
-.nav-rail-slot .vaya-nav-btn:hover .vaya-nav-label,
-.nav-rail-slot .vaya-nav-btn:focus-visible .vaya-nav-label {
-  opacity: 1;
+/* Inactive labels visible at 60% opacity on hover only */
+.nav-rail-slot .vaya-nav-btn:not([data-active="true"]):hover .vaya-nav-label,
+.nav-rail-slot .vaya-nav-btn:not([data-active="true"]):focus-visible .vaya-nav-label {
+  opacity: 0.6;
+  font-weight: 500;
   transform: translateX(0);
-  pointer-events: none;
 }
-.nav-rail-slot .vaya-nav-btn:not([data-active="true"]):hover .vaya-nav-label {
-  background: rgba(245, 239, 227, 0.95);
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(20, 33, 61, 0.08);
-  box-shadow: 0 2px 8px rgba(20, 33, 61, 0.08);
+/* ── Dark section theme (e.g. Meet Vaya dark window) ── */
+.nav-rail-slot[data-theme="dark"] .vaya-nav-dot {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.nav-rail-slot[data-theme="dark"] .vaya-nav-btn[data-active="true"] .vaya-nav-dot {
+  background: #f2b84b;
+  border-color: #f2b84b;
+  box-shadow: 0 0 0 3px rgba(242, 184, 75, 0.35);
+}
+.nav-rail-slot[data-theme="dark"] .vaya-nav-roman {
+  color: rgba(255, 255, 255, 0.6);
+}
+.nav-rail-slot[data-theme="dark"] .vaya-nav-btn[data-active="true"] .vaya-nav-roman {
+  color: #ffffff;
+  font-weight: 700;
+}
+.nav-rail-slot[data-theme="dark"] .vaya-nav-label {
+  color: #ffffff;
+}
+.nav-rail-slot[data-theme="dark"] .vaya-nav-btn:not([data-active="true"]):hover .vaya-nav-label,
+.nav-rail-slot[data-theme="dark"] .vaya-nav-btn:not([data-active="true"]):focus-visible .vaya-nav-label {
+  opacity: 0.6;
+  color: #ffffff;
 }
 .nav-rail-slot .vaya-nav-underline {
   display: none !important;
+}
+
+/* ── Mobile/Tablet Fluid Typography and Layout Rules ── */
+@media (max-width: 1023px) {
+  h1 {
+    font-size: clamp(2.1rem, 9vw, 3.2rem) !important;
+    line-height: 1.15 !important;
+  }
+  h2 {
+    font-size: clamp(1.7rem, 7vw, 2.4rem) !important;
+    line-height: 1.2 !important;
+  }
+  body, p, input, select, textarea, button {
+    line-height: 1.5;
+  }
+}
+
+/* ── Mobile Waitlist Bottom Sheet ── */
+@media (max-width: 640px) {
+  .wl-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .wl-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: calc(100dvh - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .wl-field input[type="email"],
+  .wl-field select {
+    height: 52px !important;
+    font-size: 16px !important;
+  }
+  .wl-radio-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .wl-radio {
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .wl-submit {
+    position: sticky !important;
+    bottom: 0 !important;
+    min-height: 52px !important;
+    margin-top: auto !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    background: #fdf8ec !important;
+    z-index: 10 !important;
+  }
 }
