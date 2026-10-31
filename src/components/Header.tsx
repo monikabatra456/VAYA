@@ -16,15 +16,15 @@ export default function Header({ visible = true, onWaitlist }: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between pointer-events-none transition-opacity duration-700 ease-out ${
+      className={`fixed top-0 left-0 w-full z-[60] flex items-center justify-between pointer-events-none transition-opacity duration-700 ease-out ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
-        padding: '20px 5vw',
+        padding: '14px 5vw',
         background: 'transparent',
       }}
     >
-      {/* LEFT: Logo (height 88px desktop / 62px mobile, no box/backdrop, click -> top) */}
+      {/* LEFT: Logo (height var(--logo-h) desktop, click -> top) */}
       <Link
         href="/"
         onClick={scrollToTop}
@@ -34,7 +34,8 @@ export default function Header({ visible = true, onWaitlist }: HeaderProps) {
         <img
           src="/assets/vaya-logo-500.webp"
           alt="VAYA Logo"
-          className="h-[62px] md:h-[88px] w-auto object-contain select-none"
+          style={{ height: "var(--logo-h)", width: "auto" }}
+          className="object-contain select-none"
           draggable={false}
         />
       </Link>

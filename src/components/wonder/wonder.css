@@ -1,0 +1,991 @@
+/* src/components/wonder/wonder.css */
+
+:root {
+  --ww-cream: #F6F1E7;
+  --ww-navy: #14213D;
+  --ww-orange: #C4782A;
+  --ww-teal: #1E6F7A;
+  --ww-soft: #6B7280;
+  --right-glow-opacity: 0.6; /* Dial right-side background sunlight glow up/down */
+}
+
+/* ── Section Container: Pale cream -> soft golden haze sky (IMG-REF spec) ── */
+.ww-section {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: max(100vh, 800px);
+  width: 100%;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 80%, rgba(255, 230, 180, 0.45), transparent 75%),
+    linear-gradient(180deg, #F6F1E7 0%, #faf0dc 35%, #f7e6ca 65%, #f4d8b0 100%);
+  overflow: hidden;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: calc(var(--header-h, 84px) + 10px);
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* ── Seamless transition between Section 2 & Section 3 ── */
+.ww-top-blend {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(to bottom, #F6F1E7 0%, rgba(246, 241, 231, 0) 100%);
+  pointer-events: none;
+  z-index: 18;
+}
+
+/* ── 4 Large Soft White Cloud Blobs in Sky ── */
+.ww-cloud-blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ww-cloud-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.ww-cloud-blob-1 {
+  width: 500px;
+  height: 240px;
+  left: 2%;
+  top: 8%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.ww-cloud-blob-2 {
+  width: 580px;
+  height: 260px;
+  right: 3%;
+  top: 10%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.ww-cloud-blob-3 {
+  width: 460px;
+  height: 220px;
+  left: 12%;
+  top: 26%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.ww-cloud-blob-4 {
+  width: 520px;
+  height: 250px;
+  right: 10%;
+  top: 28%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+/* ── Bottom Landscape: hazy distant mountains, brighter lake (Bug 7) ── */
+.ww-bg-landscape {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 115%;
+  height: auto;
+  pointer-events: none;
+  z-index: 2;
+  display: block;
+  filter: contrast(0.98) brightness(1.06) saturate(1.05);
+}
+
+@media (min-aspect-ratio: 1865/1000) {
+  .ww-bg-landscape {
+    left: 0;
+    right: auto;
+    width: 100%;
+  }
+}
+
+/* ── Warm Sunlight Glow on Right Side of Background (Scope Lock B) ── */
+.ww-right-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: var(--right-glow-opacity, 0.6);
+  background:
+    radial-gradient(ellipse 60% 65% at 90% 28%, rgba(255, 232, 196, 0.30) 0%, rgba(255, 238, 212, 0.14) 40%, rgba(255, 244, 228, 0) 75%),
+    linear-gradient(90deg, rgba(255, 246, 232, 0) 55%, rgba(255, 240, 220, 0.12) 100%);
+}
+
+@media (max-width: 768px) {
+  .ww-right-glow {
+    opacity: calc(var(--right-glow-opacity, 0.6) * 0.60);
+    background:
+      radial-gradient(ellipse 55% 55% at 92% 20%, rgba(255, 232, 196, 0.30) 0%, rgba(255, 238, 212, 0.14) 40%, rgba(255, 244, 228, 0) 75%),
+      linear-gradient(90deg, rgba(255, 246, 232, 0) 55%, rgba(255, 240, 220, 0.12) 100%);
+  }
+}
+
+/* ── Watermark: Per-Letter Interactive Span Row (Playfair Display 700, top ~24%) ── */
+.ww-watermark-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 96vw;
+  z-index: 4;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ww-wm-char {
+  display: inline-block;
+  font-size: clamp(36px, 6.2vw, 104px);
+  font-weight: 700;
+  letter-spacing: clamp(4px, 0.6vw, 12px);
+  cursor: default;
+  pointer-events: auto;
+  will-change: transform, color, opacity;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease, opacity 0.4s ease;
+}
+
+.ww-wm-char:not(:hover) {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), color 0.7s ease, opacity 0.7s ease;
+}
+
+.ww-wm-space {
+  display: inline-block;
+  width: clamp(14px, 2.2vw, 36px);
+  pointer-events: none;
+}
+
+/* ── Header Area (Change 1: z-index 55 sits above stage area 10, smooth fade on zoom) ── */
+.ww-head {
+  position: absolute;
+  top: calc(var(--header-h, 84px) + 12px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 55;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+  transition: opacity 0.35s ease;
+}
+
+.ww-head--zoomed {
+  opacity: 0.15;
+}
+
+.ww-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ww-orange);
+}
+
+.ww-title {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(32px, 4.2vw, 54px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ww-navy);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.ww-accent-word {
+  font-family: var(--font-caveat), cursive;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.18em;
+  color: var(--ww-orange);
+  display: inline-block;
+  vertical-align: baseline;
+  margin-left: 6px;
+}
+
+.ww-subtitle {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: clamp(13px, 1.1vw, 15px);
+  color: var(--ww-soft);
+  margin: 6px 0 0;
+  font-weight: 400;
+  max-width: 580px;
+}
+
+/* ── Globe Stage Area ── */
+.ww-stage-area {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* ── Soft Elliptical Ground Shadow under Globe (Bug 7: ~60% width, ~25% opacity, ~20-30px below bottom) ── */
+.ww-globe-shadow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(80, 50, 20, 0.25) 0%, rgba(80, 50, 20, 0.08) 50%, transparent 75%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 7;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Rotating Circular SVG Text Ring: "STAND IN • STEP OUT •" (Bug 5: ~40s/loop) ── */
+.ww-text-ring {
+  position: absolute;
+  pointer-events: none;
+  z-index: 8;
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+
+.ww-text-ring-spin {
+  transform-origin: 300px 300px;
+  animation: wwRingSpin 40s linear infinite;
+}
+
+@keyframes wwRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ww-text-ring text {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  fill: var(--ww-orange);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ── Golden Orbit Plane & Trail ── */
+.ww-golden-plane {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+  transform-origin: center center;
+  transition: opacity 0.35s ease;
+}
+
+.ww-trail-dot {
+  position: absolute;
+  border-radius: 50%;
+  background-color: #FFB020;
+  box-shadow: 0 0 6px rgba(255, 176, 32, 0.8);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.35s ease;
+}
+
+/* ── Canvas: Crisp Three.js Globe ── */
+.ww-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto; /* Enables dragging / spinning the globe */
+}
+
+.ww-canvas:active {
+  cursor: grabbing;
+}
+
+/* ── Vertical Control Group at Right Gutter (+ / − / X) per Bug 6 ── */
+.ww-right-controls {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 45;
+  pointer-events: auto;
+}
+
+.ww-ctrl-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid rgba(20, 33, 61, 0.12);
+  color: var(--ww-navy);
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(20, 33, 61, 0.08);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  outline: none;
+}
+
+.ww-ctrl-btn:hover:not(:disabled) {
+  background: #FFFFFF;
+  color: var(--ww-teal);
+  transform: scale(1.08);
+  border-color: var(--ww-teal);
+  box-shadow: 0 6px 18px rgba(30, 111, 122, 0.18);
+}
+
+.ww-ctrl-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ww-ctrl-btn--reset {
+  color: var(--ww-orange);
+  font-size: 15px;
+}
+
+.ww-ctrl-btn--reset:hover {
+  color: #B23B2A;
+  border-color: #B23B2A;
+}
+
+/* ── Pins Layer ── */
+.ww-pins-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 42;
+  overflow: visible;
+}
+
+/* ── Destination Pin (Bug 2: Shown ONLY on hover, pulses) ── */
+.ww-pin {
+  display: none;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ww-pin-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--ww-teal);
+  box-shadow: 0 0 0 2.5px #FFFFFF, 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.ww-pin-inner::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.8px solid rgba(30, 111, 122, 0.6);
+  animation: wwPinPulse 2.0s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes wwPinPulse {
+  0% { transform: scale(0.7); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ── Hub Pin: Main Header VAYA Logo ── */
+.ww-hub-pin {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ww-hub-pin:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.ww-hub-pin-inner {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FFFDF9;
+  border: 2px solid var(--ww-orange);
+  box-shadow: 0 4px 18px rgba(20, 33, 61, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.ww-hub-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(20, 33, 61, 0.2));
+}
+
+.ww-hub-ripple {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 2px solid var(--ww-orange);
+  pointer-events: none;
+  animation: wwHubRipple 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.ww-hub-ripple:nth-child(2) {
+  animation-delay: 1.1s;
+}
+
+@keyframes wwHubRipple {
+  0% { transform: scale(0.6); opacity: 0.95; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ── Leader Lines SVG (Dotted line to hovered pin, Bug 2) ── */
+.ww-leader-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+  overflow: visible;
+}
+
+/* ── Cards Container Layer ── */
+.ww-cards-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* ── Orbiting Cards Design (Bug 3 & 4: clean white card, rounded 22px, no text truncation) ── */
+.ww-card {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 204px;
+  background: #FFFFFF;
+  border-radius: 22px;
+  border: 1px solid rgba(20, 33, 61, 0.08);
+  box-shadow: 0 12px 32px rgba(20, 33, 61, 0.12), 0 2px 6px rgba(20, 33, 61, 0.05);
+  padding: 8px 8px 10px 8px;
+  cursor: pointer;
+  text-align: left;
+  outline: none;
+  transform-origin: center center;
+  pointer-events: auto;
+  user-select: none;
+  box-sizing: border-box;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.ww-card:hover,
+.ww-card--active {
+  box-shadow: 0 20px 44px rgba(20, 33, 61, 0.20), 0 4px 12px rgba(20, 33, 61, 0.08);
+  border-color: rgba(196, 120, 42, 0.45);
+}
+
+.ww-card-photo-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #E5E7EB;
+}
+
+.ww-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.ww-card:hover .ww-card-photo {
+  transform: scale(1.05);
+}
+
+.ww-card-chip {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2.5px 8px;
+  border-radius: 999px;
+  background: rgba(15, 28, 51, 0.72);
+  color: #FFFFFF;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.ww-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 4px 2px 4px;
+  gap: 6px;
+}
+
+.ww-card-footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ww-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ww-card-teal-pin {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.ww-card-name {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #14213D;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.ww-card-subtitle {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  padding-left: 17px;
+}
+
+.ww-card-arrow-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid #C4782A;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ww-card:hover .ww-card-arrow-circle {
+  background-color: rgba(196, 120, 42, 0.12);
+  transform: scale(1.08);
+}
+
+/* ── Tap Tooltip Pill ── */
+.ww-tap-tooltip {
+  position: absolute;
+  transform: translate(-50%, -130%);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(20, 33, 61, 0.92);
+  color: #FFFDF9;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+  z-index: 52;
+  animation: wwTooltipFade 2s ease forwards;
+}
+
+.ww-tap-tooltip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #A0AAB5;
+  animation: wwDotPulse 1.2s infinite;
+}
+
+@keyframes wwDotPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes wwTooltipFade {
+  0% { opacity: 0; transform: translate(-50%, -110%) scale(0.9); }
+  15% { opacity: 1; transform: translate(-50%, -130%) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -140%) scale(0.95); }
+}
+
+/* ── Bottom Bar & Dark Navy Glass CTA Pill ── */
+.ww-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 36px 8px;
+  z-index: 45;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.ww-hint {
+  position: absolute;
+  left: 36px;
+  bottom: 14px;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 12px;
+  color: #6B7280;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .ww-hint {
+    display: none;
+  }
+}
+
+.ww-cta-pill {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 28, 51, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 8px 8px 8px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 16px 36px rgba(15, 28, 51, 0.22);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .ww-cta-pill {
+    padding: 6px 6px 6px 14px;
+    gap: 10px;
+    bottom: 8px;
+    max-width: 92vw;
+  }
+  .ww-cta-label {
+    font-size: 13px;
+  }
+  .ww-cta-btn-pill {
+    padding: 4px 5px 4px 12px;
+    font-size: 12px;
+    gap: 6px;
+  }
+  .ww-right-controls {
+    right: 12px;
+  }
+}
+
+.ww-cta-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ww-cta-bar {
+  width: 2px;
+  height: 22px;
+  background-color: #C4782A;
+  border-radius: 1px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.ww-cta-label {
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.ww-cta-accent {
+  font-family: var(--font-caveat), cursive;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.25em;
+  color: #C4782A;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+.ww-cta-btn-pill {
+  background: transparent;
+  border: 1.5px solid #FFFFFF;
+  color: #FFFFFF;
+  border-radius: 999px;
+  padding: 4px 5px 4px 18px;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ww-cta-btn-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.ww-cta-circle-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.ww-cta-btn-pill:hover .ww-cta-circle-arrow {
+  transform: scale(1.08) rotate(5deg);
+}
+
+/* ── Detail Modal Panel ── */
+.ww-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(20, 33, 61, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ww-modal-panel {
+  position: relative;
+  width: min(580px, 92vw);
+  background: #FFFDF9;
+  border-radius: 24px;
+  box-shadow: 0 30px 70px rgba(20, 33, 61, 0.25);
+  border: 1px solid rgba(206, 178, 140, 0.38);
+  display: flex;
+  overflow: hidden;
+  max-height: min(480px, 88vh);
+}
+
+.ww-modal-left {
+  width: 44%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #14213d;
+}
+
+.ww-modal-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ww-modal-right {
+  width: 56%;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+
+.ww-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid rgba(20, 33, 61, 0.12);
+  color: var(--ww-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s, background 0.2s;
+  z-index: 2;
+  outline: none;
+}
+
+.ww-modal-close:hover {
+  transform: scale(1.1);
+  background: #F8F9FA;
+}
+
+.ww-modal-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #DDEFEF;
+  color: var(--ww-teal);
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.ww-modal-name {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ww-navy);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.ww-modal-loc {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 13px;
+  color: var(--ww-soft);
+  margin: 4px 0 12px;
+}
+
+.ww-modal-best-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: #F4EFE6;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ww-navy);
+  margin-bottom: 12px;
+}
+
+.ww-modal-desc {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #374151;
+  margin: 0 0 18px;
+}
+
+.ww-modal-plan-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--ww-navy);
+  color: #FFFFFF;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.18s;
+  outline: none;
+}
+
+.ww-modal-plan-btn:hover {
+  background: #25205f;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 680px) {
+  .ww-modal-panel {
+    flex-direction: column;
+    max-height: 90vh;
+  }
+  .ww-modal-left {
+    width: 100%;
+    height: 180px;
+  }
+  .ww-modal-right {
+    width: 100%;
+    padding: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ww-wm-char {
+    transition: none !important;
+    transform: none !important;
+  }
+  .ww-head {
+    transition: none !important;
+  }
+}

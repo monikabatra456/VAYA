@@ -43,11 +43,11 @@ function flyEase(p) {
 
 // ── Bird definitions (Scene B) ───────────────────────────────────────────────
 const BIRD_DEFS = [
-  { xPct: 8,  yVh: 14, scale: 1.00, bob: 6  },
-  { xPct: 14, yVh: 17, scale: 0.75, bob: 5  },
-  { xPct: 5,  yVh: 20, scale: 0.60, bob: 4  },
-  { xPct: 20, yVh: 13, scale: 0.85, bob: 7  },
-  { xPct: 11, yVh: 23, scale: 0.55, bob: 3  },
+  { xPct: 78, yVh: 14, scale: 1.00, bob: 6  },
+  { xPct: 84, yVh: 17, scale: 0.75, bob: 5  },
+  { xPct: 73, yVh: 19, scale: 0.60, bob: 4  },
+  { xPct: 88, yVh: 13, scale: 0.85, bob: 7  },
+  { xPct: 80, yVh: 22, scale: 0.55, bob: 3  },
 ];
 
 function BirdSVG({ scale }) {
@@ -103,6 +103,7 @@ export default function Hero() {
     let H      = window.innerHeight;
     let mobile = W < 768;
     setIsMobile(mobile);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let wrapperTop  = 0;
     let scrollMax   = 1;
@@ -155,7 +156,6 @@ export default function Hero() {
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     // prefers-reduced-motion
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       if (baseRef.current)      baseRef.current.style.opacity      = "0";
       if (cloudFarRef.current)  cloudFarRef.current.style.opacity  = "0";
@@ -519,6 +519,27 @@ export default function Hero() {
           SCROLL TO EXPLORE
           <span aria-hidden="true">⌄</span>
         </div>
+
+        {/* ── Seamless transition into Section 2 beige (#F7F2E7) ── */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: isMobile ? "120px" : "clamp(140px, 18vh, 190px)",
+            pointerEvents: "none",
+            zIndex: Z.sceneB + 1,
+            background: `linear-gradient(
+              to bottom,
+              rgba(247, 242, 231, 0) 0%,
+              rgba(247, 242, 231, 0.25) 40%,
+              rgba(247, 242, 231, 0.75) 75%,
+              #F7F2E7 100%
+            )`,
+          }}
+        />
 
       </div>
     </section>
