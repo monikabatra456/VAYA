@@ -145,9 +145,52 @@ export default function Section2() {
   const flightRef           = useRef<FlightPathRef>(null);
   const preloadedRef        = useRef<Set<string>>(new Set());
 
+  // ── ScrollTrigger blend animations: 1 -> 2 entrance, 2 -> 3 headline exit ─
+  useEffect(() => {
+    if (typeof window === "undefined" || isReduced) return;
+    const s = sectionRef.current;
+    if (!s) return;
+
+    // 1 -> 2: Cards and content rise in last 30% of hero fade (opacity 0 -> 1, translateY 40px -> 0)
+    const enterST = ScrollTrigger.create({
+      trigger: s,
+      start: "top 85%",
+      end: "top 25%",
+      scrub: true,
+      onUpdate: (self) => {
+        const p = Math.max(0, Math.min(1, (self.progress - 0.7) / 0.3));
+        if (cardsContRef.current) {
+          cardsContRef.current.style.opacity = `${p}`;
+          cardsContRef.current.style.transform = `translateY(${(1 - p) * 40}px)`;
+        }
+      },
+    });
+
+    // 2 -> 3: As Section 2 cards finish scrolling, headline moves up 30px and fades out
+    const exitST = ScrollTrigger.create({
+      trigger: s,
+      start: "bottom 110%",
+      end: "bottom 85%",
+      scrub: true,
+      onUpdate: (self) => {
+        const ep = self.progress;
+        const heading = document.getElementById("s2-heading-block");
+        if (heading) {
+          heading.style.opacity = `${1 - ep}`;
+          heading.style.transform = `translateY(-${ep * 30}px)`;
+        }
+      },
+    });
+
+    return () => {
+      enterST.kill();
+      exitST.kill();
+    };
+  }, [isReduced]);
+
   // ── Detect mobile / reduced motion ─────────────────────────────────────────
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setIsReduced(mq.matches);
     mq.addEventListener("change", (e) => setIsReduced(e.matches));
@@ -341,6 +384,7 @@ export default function Section2() {
         <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
           {/* ── Left column: heading text ── */}
           <div
+            id="s2-heading-block"
             className="s2-heading-col"
             style={{
               position: "absolute",
@@ -358,6 +402,7 @@ export default function Section2() {
               justifyContent: "center",
               zIndex: 10,
               pointerEvents: "auto",
+              willChange: "transform, opacity",
             }}
           >
             <SectionHeading />

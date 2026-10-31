@@ -42,7 +42,7 @@ export default function SmoothScroll() {
       };
 
       gsap.ticker.add(tickerFn);
-      gsap.ticker.lagSmoothing(0);
+      gsap.ticker.lagSmoothing(1000, 16);
     });
 
     return () => {

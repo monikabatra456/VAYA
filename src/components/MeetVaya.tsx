@@ -173,6 +173,12 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
       scrub: true,
       onUpdate: (self) => {
         applyRevealProgress(self.progress);
+        if (plateWrapRef.current) {
+          const s = 1.06 - 0.06 * self.progress;
+          const op = 0.75 + 0.25 * self.progress;
+          plateWrapRef.current.style.transform = `scale(${s})`;
+          plateWrapRef.current.style.opacity = `${op}`;
+        }
       },
     });
 
@@ -236,10 +242,14 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
           end: 'bottom 80%',
           scrub: true,
           onUpdate: (self) => {
+            const ep = self.progress;
             if (textColRef.current) {
-              const ep = self.progress;
               textColRef.current.style.transform = `translateY(calc(-50% - ${ep * 30}px))`;
               textColRef.current.style.opacity = `${1 - ep}`;
+            }
+            if (phoneRef.current) {
+              phoneRef.current.style.transform = `translateY(-${ep * 40}px)`;
+              phoneRef.current.style.opacity = `${1 - ep}`;
             }
           },
         });
@@ -461,6 +471,20 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
           </div>
         </div>
       </div>
+      {/* ── Seamless transition from Section 4 dark cabin into Section 5 peach sunset ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '24svh',
+          pointerEvents: 'none',
+          zIndex: 25,
+          background: 'linear-gradient(to bottom, rgba(17, 14, 12, 0) 0%, rgba(249, 238, 225, 0.4) 50%, #f9eee1 100%)',
+        }}
+      />
     </section>
   );
 }

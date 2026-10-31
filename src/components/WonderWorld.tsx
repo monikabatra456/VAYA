@@ -1688,6 +1688,20 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
           </div>
         </div>
       )}
+      {/* ── Seamless transition into Section 4 dark cabin tone (#110e0c) ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '24svh',
+          pointerEvents: 'none',
+          zIndex: 25,
+          background: 'linear-gradient(to bottom, rgba(17, 14, 12, 0) 0%, rgba(17, 14, 12, 0.45) 45%, #110e0c 100%)',
+        }}
+      />
     </section>
   );
 }
