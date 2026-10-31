@@ -1138,6 +1138,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       <div
         ref={watermarkRef}
         className={`ww-watermark-wrapper ${playfair.className}`}
+        suppressHydrationWarning
         aria-label="THE WONDER WORLD"
       >
         {WATERMARK_CHARS.map((char, index) => {
