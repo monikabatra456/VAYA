@@ -72,12 +72,14 @@ export default function Footer() {
           </span>
 
           <div
+            className="footer-social-links-wrap"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
               justifyContent: 'center',
               alignItems: 'center',
               gap: '16px',
+              margin: '0 auto',
             }}
           >
             {siteConfig.socialLinks.map((item) => (
@@ -232,7 +234,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* 5. Subtle Admin Link at the very bottom (kept tiny & intact) */}
+        {/* 5. Subtle Admin Link with >= 44x44px touch target area */}
         <div style={{ paddingTop: '8px' }}>
           <Link
             href="/admin"
@@ -242,6 +244,12 @@ export default function Footer() {
               textDecoration: 'none',
               letterSpacing: '0.06em',
               fontWeight: 500,
+              minWidth: '44px',
+              minHeight: '44px',
+              padding: '12px 18px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
             className="footer-admin-link"
           >
@@ -251,6 +259,27 @@ export default function Footer() {
       </div>
 
       <style jsx>{`
+        
+        @media (max-width: 640px) {
+          .footer-social-links-wrap {
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+            max-width: 340px !important;
+            gap: 12px !important;
+          }
+          .footer-social-link {
+            width: 100% !important;
+            height: 48px !important;
+            box-sizing: border-box !important;
+            justifyContent: center !important;
+          }
+          .footer-founders-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+        }
+
         .footer-social-link:hover {
           border-color: #9a6420 !important;
           color: #9a6420 !important;

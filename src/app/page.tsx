@@ -15,14 +15,14 @@ export default function Home() {
   const [showWaitlist, setShowWaitlist] = useState(false);
 
   return (
-    <main className="relative w-full">
+    <main className="relative w-full overflow-x-hidden">
       <ScrollManager />
       {/* Unified morphing nav — header on HOME, bottom-left index off-home.
           SideIndex and Header are NOT rendered here (nav handles everything). */}
       <Nav onWaitlist={() => setShowWaitlist(true)} />
 
       {/* Section 1: Hero */}
-      <Hero />
+      <Hero onWaitlist={() => setShowWaitlist(true)} />
 
       {/* Section 2: The Travel Struggle */}
       <Section2 />
