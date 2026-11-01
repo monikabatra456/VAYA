@@ -50,6 +50,10 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const goldenDashObj = useRef({ offset: 0 });
 
   const targetCamZ = useRef(3.3);
+  // Pinch-to-zoom (touch): active pointers + pinch start state
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ dist: number; zoom: number } | null>(null);
+  const zoomLevelRef = useRef(1.0);
   const currentCamZ = useRef(3.3);
 
   // Globe rotation (yaw, pitch)
@@ -500,6 +504,23 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       return;
     }
 
+    // Two fingers => pinch-zoom instead of drag
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size === 2) {
+      const [a, b] = Array.from(pointersRef.current.values());
+      pinchRef.current = { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, zoom: zoomLevelRef.current };
+      rot.current.isDragging = false;
+      rot.current.totalMove = 99; // never treat a pinch as a tap
+      setHasInteracted(true);
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        // Ignore
+      }
+      return;
+    }
+    if (pointersRef.current.size > 2) return;
+
     rot.current.isPointerDown = true;
     rot.current.isDragging = false;
     rot.current.hasCaptured = false;
@@ -531,6 +552,17 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (pinchRef.current && pointersRef.current.size >= 2) {
+      const [a, b] = Array.from(pointersRef.current.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const next = Math.max(1.0, Math.min(2.2, Number((pinchRef.current.zoom * (dist / pinchRef.current.dist)).toFixed(2))));
+      targetCamZ.current = 3.3 / next;
+      setZoomLevel(next);
+      return;
+    }
     if (!rot.current.isPointerDown && !rot.current.isDragging) return;
 
     const dx = e.clientX - rot.current.lastX;
@@ -582,6 +614,8 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
     const wasDragging = rot.current.isDragging;
     const hadCaptured = rot.current.hasCaptured;
     const totalMove = rot.current.totalMove;
@@ -1178,6 +1212,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     };
   }, [updateDims]);
 
+  zoomLevelRef.current = zoomLevel;
   const isZoomed = zoomLevel > 1.05;
 
   return (

@@ -1412,62 +1412,21 @@
     position: relative;
     padding: 100px 20px 60px;
     overflow: hidden;
-    background: #140c07 !important;
-    background-color: #140c07 !important;
-    margin-top: 0 !important;
+    background: #1a1614;
     display: block !important;
-    z-index: 10 !important;
-    border: none !important;
-    box-shadow: none !important;
   }
 
   .mv-plate-wrapper {
-    position: relative !important;
-    inset: auto !important;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: auto !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-  }
-
-  .mv-window-scene-viewport,
-  .mv-plate-img {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    opacity: 0.55 !important;
-    pointer-events: none !important;
-  }
-
-  .mv-window-bg {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-  }
-
-  .mv-window-bloom {
-    display: none !important;
-  }
-
-  .mv-gradient-overlay {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: linear-gradient(180deg, rgba(20,12,7,.92) 0%, rgba(20,12,7,.75) 45%, rgba(20,12,7,.45) 100%) !important;
-    pointer-events: none !important;
-    z-index: 2 !important;
+    position: absolute;
+    inset: 0;
+    /* base rule centres the plate with top/left 50% + translate(-50%,-50%);
+       inset:0 alone left that translate active and shifted the whole plate
+       (and the text inside it) half a screen up/left. */
+    transform: none;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+    pointer-events: none;
   }
 
   .mv-content-container {
@@ -1482,86 +1441,177 @@
   }
 
   .mv-left-col {
-    position: relative !important;
-    left: auto !important;
-    top: auto !important;
+    position: relative;
+    left: auto;
+    top: auto;
     transform: none !important;
-    width: 100% !important;
-    max-width: 520px !important;
-    margin: 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    z-index: 10 !important;
-    opacity: 1 !important;
+    width: 100%;
+    max-width: 480px;
+    align-items: center;
+    text-align: center;
   }
 
   .mv-headline {
-    font-size: clamp(26px, 7.2vw, 34px) !important;
-    line-height: 1.25 !important;
-    margin-bottom: 16px !important;
-    opacity: 1 !important;
-    text-align: center !important;
+    font-size: clamp(26px, 5.8vw, 36px);
+    line-height: 1.22;
+    margin-bottom: 16px;
   }
 
   .mv-paragraph {
-    font-size: 15px !important;
-    line-height: 1.5 !important;
-    text-align: center !important;
-    opacity: 1 !important;
-    max-width: 440px !important;
-    margin: 0 auto !important;
-  }
-
-  .mv-subtext-line-mask {
-    overflow: visible !important;
-    display: inline !important;
-  }
-
-  .mv-subtext-line {
-    opacity: 1 !important;
-    transform: none !important;
+    font-size: 15px;
+    line-height: 1.45;
   }
 
   .mv-gold-line {
-    margin: 16px auto !important;
-    transform: scaleX(1) !important;
+    margin: 16px auto;
   }
 
   .mv-features {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    max-width: 360px;
     gap: 10px;
-    margin: 20px auto 0;
+    margin-top: 20px;
   }
 
   .mv-feature-divider {
-    display: none !important;
+    display: none;
   }
 
   .mv-feature-item {
-    width: 100% !important;
-    justify-content: flex-start !important;
-    padding: 10px 16px !important;
-    border-radius: 12px !important;
-    opacity: 1 !important;
-    transform: none !important;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 16px;
+    border-radius: 12px;
   }
 
-  .mv-phone-stage {
-    position: relative !important;
-    left: auto !important;
-    top: auto !important;
-    transform: none !important;
-    width: min(78vw, 300px) !important;
-    margin: 32px auto 0 !important;
-    aspect-ratio: 851 / 1292 !important;
-    height: auto !important;
+  .mv-phone-wrap {
+    width: 260px;
+    margin: 8px auto;
+  }
+}
+
+/* ── Mobile/Tablet (<=1023px) Seam B & Background Fixes ── */
+@media (max-width: 1023px) {
+  .mv-section {
+    background: transparent !important;
+    background-color: transparent !important;
+    margin-top: -80px !important;
     z-index: 10 !important;
-    opacity: 1 !important;
-    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .mv-plate-wrapper {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
+    mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
+  }
+}
+
+/* ── MOBILE / TABLET (<=1023px): proper stacked layout ────────────────────
+   Desktop positions the text and the phone in % of the 1672x941 plate image.
+   On a portrait screen that breaks (text over phone, washed-out plate), so
+   here: full-opacity plate + top-down dark gradient for legibility, compact
+   centred text block, phone anchored to the bottom (hand coming up). */
+@media (max-width: 1023px) {
+  .mv-section {
+    --mv-pw: min(64vw, 340px);              /* phone-stage (phone + hand) width */
+    padding: 0 !important;
+    /* section has margin-top:-80px (seam blend) so when pinned it sits 80px
+       above the viewport top; add 80px so its bottom still reaches the
+       screen bottom instead of leaving a cream strip */
+    min-height: calc(100svh + 80px);
+  }
+
+  .mv-plate-wrapper {
+    opacity: 1;
+  }
+
+  .mv-plate-img {
+    object-position: 68% 50%;
+  }
+
+  .mv-gradient-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(20, 12, 7, 0.92) 0%,
+      rgba(20, 12, 7, 0.82) 38%,
+      rgba(20, 12, 7, 0.35) 62%,
+      transparent 82%
+    );
+  }
+
+  .mv-left-col {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    max-width: none;
+    padding: 164px 20px 0; /* 80px seam offset + 84px header clearance */
+    box-sizing: border-box;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mv-headline {
+    font-size: clamp(21px, 5.4vw, 34px);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .mv-paragraph {
+    font-size: clamp(12.5px, 3.3vw, 16px);
+    line-height: 1.45;
+    margin-bottom: 12px;
+    max-width: 440px;
+  }
+
+  .mv-gold-line {
+    margin: 0 auto 12px;
+  }
+
+  .mv-features {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    max-width: 460px;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .mv-feature-divider {
+    display: none;
+  }
+
+  .mv-feature-item {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 4px;
+    border-radius: 12px;
+  }
+
+  .mv-feature-icon-wrap {
+    width: 34px;
+    height: 34px;
+  }
+
+  .mv-feature-label {
+    font-size: clamp(10.5px, 2.8vw, 13px);
+    line-height: 1.25;
+  }
+
+  /* phone: centred on the SCREEN (screen centre is ~32.6% into the stage),
+     anchored to the bottom; overrides the desktop inline left/top/width */
+  .mv-phone-stage {
+    left: calc(50% - var(--mv-pw) * 0.326) !important;
+    top: auto !important;
+    bottom: calc(var(--mv-pw) * -0.16);
+    width: var(--mv-pw) !important;
   }
 }

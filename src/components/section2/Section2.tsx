@@ -455,6 +455,7 @@ export default function Section2() {
 
       {/* ── Bottom scene: clean transparent WebP with bottom fade ── */}
       <div
+        className="s2-bottom-scene"
         aria-hidden="true"
         style={{
           position: "absolute",
@@ -474,6 +475,7 @@ export default function Section2() {
           <source srcSet="/images/vaya-bottom-scene.webp" type="image/webp" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            className="s2-bottom-scene-img"
             src="/images/vaya-bottom-scene.webp"
             alt=""
             width={2400}
@@ -494,6 +496,7 @@ export default function Section2() {
 
       {/* ── Seamless transition into Section 3 cream (#F6F1E7) matching Section I->II in IMG-BLEND ── */}
       <div
+        className="s2-bottom-fade"
         aria-hidden="true"
         style={{
           position: "absolute",
