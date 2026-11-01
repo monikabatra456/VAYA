@@ -192,7 +192,7 @@ html, body {
   font-family: var(--font-jakarta), sans-serif;
   font-size: clamp(1.3rem, 2vw, 2.2rem);
   font-weight: 500;
-  color: #3E6FB0;
+  color: var(--navy);
   letter-spacing: 0.01em;
   will-change: transform, opacity;
   text-shadow: 0 2px 14px rgba(255, 255, 255, 0.55);
