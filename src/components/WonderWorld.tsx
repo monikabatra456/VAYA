@@ -4,16 +4,12 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { Playfair_Display } from 'next/font/google';
+import '@fontsource/playfair-display/700.css';
 import { DESTINATIONS, HUB, INDIA_POLYGON, type Destination } from '@/data/destinations';
 import { latLonToVec3, vec3ToLatLon, focusAngles, arcPoints, isPointInPolygon } from './wonder/geo';
 import './wonder/wonder.css';
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['700'],
-  display: 'swap',
-});
+
 
 const INITIAL_PITCH = (18 * Math.PI) / 180; // 18 degrees latitude tilt
 const WATERMARK_CHARS = 'THE WONDER WORLD'.split('');
@@ -1217,7 +1213,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       {/* Watermark: Per-letter interactive hover ripple (Change 2) */}
       <div
         ref={watermarkRef}
-        className={`ww-watermark-wrapper ${playfair.className}`}
+        className="ww-watermark-wrapper"
         suppressHydrationWarning
         aria-label="THE WONDER WORLD"
       >

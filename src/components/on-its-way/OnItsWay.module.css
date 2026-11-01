@@ -1,6 +1,9 @@
 /* src/components/on-its-way/OnItsWay.module.css */
 
 .container {
+  --font-serif: 'Playfair Display', 'DM Serif Display', Georgia, serif;
+  --font-script: 'Kaushan Script', 'Yellowtail', cursive;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --navy: #14264A;
   --gold: #C98A3A;
   --cream: #F9F0E1;

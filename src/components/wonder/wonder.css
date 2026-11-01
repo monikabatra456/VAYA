@@ -136,6 +136,7 @@
 
 /* ── Watermark: Per-Letter Interactive Span Row (Playfair Display 700, top ~24%) ── */
 .ww-watermark-wrapper {
+  font-family: var(--font-playfair, 'Playfair Display', Georgia, serif);
   position: absolute;
   left: 50%;
   top: 24%;

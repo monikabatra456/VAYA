@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Playfair_Display, Outfit } from 'next/font/google';
+import '@fontsource/playfair-display/500.css';
+import '@fontsource/playfair-display/600.css';
+import '@fontsource/outfit/400.css';
+import '@fontsource/outfit/500.css';
+import '@fontsource/outfit/600.css';
+import '@fontsource/outfit/700.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MeetPhoneScreen from './meet/MeetPhoneScreen';
@@ -61,17 +66,7 @@ const PHONE_BOX = {
   width: '35.11%', // 587 / 1672
 };
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-playfair',
-});
 
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-outfit',
-});
 
 interface MeetVayaProps {
   onWaitlist?: () => void;
@@ -347,7 +342,7 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
     <section
       id="meet-vaya"
       ref={sectionRef}
-      className={`mv-section ${playfair.variable} ${outfit.variable}`}
+      className="mv-section"
       aria-label="Meet VAYA"
       suppressHydrationWarning
     >

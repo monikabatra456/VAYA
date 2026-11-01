@@ -3,7 +3,12 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Playfair_Display, Kaushan_Script, Plus_Jakarta_Sans } from 'next/font/google';
+import '@fontsource/playfair-display/700.css';
+import '@fontsource/kaushan-script/400.css';
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './OnItsWay.module.css';
@@ -14,27 +19,9 @@ import {
 } from './pathConstants';
 import { createOnItsWayTimeline } from './onItsWayTimeline';
 
-// Load typography matching design reference
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['700'],
-  variable: '--font-serif',
-  display: 'swap',
-});
 
-const kaushan = Kaushan_Script({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-script',
-  display: 'swap',
-});
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-sans',
-  display: 'swap',
-});
+
 
 interface OnItsWayProps {
   /** Optional ref to external navbar wrapper for timeline control */
@@ -161,7 +148,7 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
       ref={containerRef}
       id="on-its-way"
       aria-label="VAYA — On Its Way"
-      className={`${styles.container} ${playfair.variable} ${kaushan.variable} ${jakarta.variable}`}
+      className={styles.container}
     >
       {/* Full-bleed sunset sky + mountains background */}
       <div ref={bgRef} className={styles.backgroundWrapper} aria-hidden="true">
