@@ -5,6 +5,7 @@ export const siteConfig = {
   name: 'VAYA',
   logo: '/assets/vaya-logo-500.webp',
   tagline: 'Your next adventure starts with VAYA. Know Before You Go!',
+  contactEmail: 'go.vayaus@gmail.com',
   socialLinks: [
     {
       name: 'WhatsApp Community',
@@ -29,15 +30,13 @@ export const siteConfig = {
     {
       name: 'Monika Batra',
       role: 'Co-founder',
-      email: 'MONIKA_EMAIL',
     },
     {
       name: 'Simardeep Kaur',
       role: 'Co-founder',
-      email: 'SIMARDEEP_EMAIL',
     },
   ],
-  madeWithLove: 'Made with love by Monika Batra',
+  madeWithLove: 'Made with love by VAYA',
   copyright: '© 2026 VAYA. All rights reserved.',
 };
 

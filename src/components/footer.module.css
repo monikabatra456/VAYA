@@ -320,6 +320,20 @@
   text-decoration: underline;
 }
 
+.contactEmailRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #4B5563;
+}
+
+.contactLabel {
+  font-weight: 600;
+  color: #14264A;
+}
+
 /* BOTTOM BAR */
 .bottomBar {
   padding-top: 28px;

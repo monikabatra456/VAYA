@@ -67,7 +67,7 @@ export default function Footer({ onWaitlist }: FooterProps) {
             <span className={styles.goldWord}>VAYA</span>.
           </h2>
           <p className={styles.subLine}>Know Before You Go!</p>
-          <div className={buttonRowStyles()}>
+          <div className={styles.buttonRow}>
             <button
               type="button"
               onClick={onWaitlist}
@@ -149,28 +149,28 @@ export default function Footer({ onWaitlist }: FooterProps) {
           <div className={styles.foundersCol}>
             <h3 className={styles.colTitle}>The founders</h3>
             <div className={styles.founderCards}>
-              {siteConfig.founders.map((founder) => {
-                const hasValidEmail = founder.email && founder.email.includes('@');
-                return (
-                  <div key={founder.name} className={styles.founderCard}>
-                    <div className={styles.avatar}>
-                      {getInitials(founder.name)}
-                    </div>
-                    <div className={styles.founderInfo}>
-                      <span className={styles.founderName}>{founder.name}</span>
-                      <span className={styles.founderRole}>{founder.role}</span>
-                      {hasValidEmail ? (
-                        <a
-                          href={`mailto:${founder.email}`}
-                          className={`${styles.founderEmail} ${styles.founderEmailLink}`}
-                        >
-                          {founder.email}
-                        </a>
-                      ) : null}
-                    </div>
+              {siteConfig.founders.map((founder) => (
+                <div key={founder.name} className={styles.founderCard}>
+                  <div className={styles.avatar}>
+                    {getInitials(founder.name)}
                   </div>
-                );
-              })}
+                  <div className={styles.founderInfo}>
+                    <span className={styles.founderName}>{founder.name}</span>
+                    <span className={styles.founderRole}>{founder.role}</span>
+                  </div>
+                </div>
+              ))}
+              {siteConfig.contactEmail && (
+                <div className={styles.contactEmailRow}>
+                  <span className={styles.contactLabel}>Contact:</span>
+                  <a
+                    href={`mailto:${siteConfig.contactEmail}`}
+                    className={`${styles.founderEmail} ${styles.founderEmailLink}`}
+                  >
+                    {siteConfig.contactEmail}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function Footer({ onWaitlist }: FooterProps) {
             >
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <span>by Monika Batra</span>
+            <span>by VAYA</span>
           </div>
           <div>
             <Link href="/admin" className={styles.adminLink} aria-label="Admin portal">
@@ -201,8 +201,4 @@ export default function Footer({ onWaitlist }: FooterProps) {
       </div>
     </footer>
   );
-}
-
-function buttonRowStyles() {
-  return styles.buttonRow;
 }
