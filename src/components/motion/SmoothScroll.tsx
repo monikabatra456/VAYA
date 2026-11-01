@@ -43,6 +43,18 @@ export default function SmoothScroll() {
 
       gsap.ticker.add(tickerFn);
       gsap.ticker.lagSmoothing(0);
+
+      if (typeof document !== 'undefined' && document.fonts?.ready) {
+        document.fonts.ready.then(() => {
+          ScrollTrigger.refresh();
+        });
+      }
+
+      if (typeof document !== 'undefined' && document.fonts?.ready) {
+        document.fonts.ready.then(() => {
+          ScrollTrigger.refresh();
+        });
+      }
     });
 
     return () => {

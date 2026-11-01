@@ -245,20 +245,6 @@ export default function Nav({ onWaitlist }: NavProps) {
 
         {/* Right: Login + Join Waitlist */}
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "10px" : "18px", pointerEvents: "auto", flexShrink: 0 }}>
-          {!isMobile && (
-            <a
-              href="#login"
-              style={{
-                fontFamily: "var(--font-jakarta)",
-                fontSize: "14px",
-                fontWeight: 400,
-                color: NAVY,
-                textDecoration: "none",
-              }}
-            >
-              Login
-            </a>
-          )}
           <button
             onClick={onWaitlist}
             style={{
