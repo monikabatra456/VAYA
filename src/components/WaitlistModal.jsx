@@ -504,7 +504,14 @@ export default function WaitlistModal({ onClose }) {
               </div>
 
               {/* 3. BIGGEST TRAVEL PROBLEM? Custom Dropdown */}
-              <div className="wl-field-group" ref={dropdownRef}>
+              {/* Each .wl-field-group is its own stacking context (z-index 2), so the open
+                  menu (z-index 50) was trapped inside it and the later "I agree" field
+                  painted on top. Lift this group while the menu is open. */}
+              <div
+                className="wl-field-group"
+                ref={dropdownRef}
+                style={isDropdownOpen ? { zIndex: 20 } : undefined}
+              >
                 <label htmlFor="wl-problem" className="wl-label">
                   Biggest travel problem?
                 </label>
