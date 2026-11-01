@@ -91,23 +91,23 @@ function SectionHeading() {
       </h2>
 
       {/* Body */}
-      <div style={{ marginTop: "14px", marginBottom: "clamp(12px, 1.8vh, 20px)", maxWidth: "330px" }}>
+      <div style={{ marginTop: "14px", marginBottom: "clamp(12px, 1.8vh, 20px)", maxWidth: "360px" }}>
         <p style={{
           fontFamily: "var(--font-jakarta)",
-          fontSize: "clamp(13px, 0.9vw, 14.5px)",
-          fontWeight: 400,
-          color: "#4A5568",
+          fontSize: "clamp(15px, 1.05vw, 17px)",
+          fontWeight: 450,
+          color: "#24334f",
           lineHeight: 1.6,
-          marginBottom: "10px",
+          marginBottom: "12px",
           letterSpacing: "-0.01em",
         }}>
           Travel is exciting, but it comes with real challenges — from overcrowded destinations to high prices, finding guides, and unexpected situations.
         </p>
         <p style={{
           fontFamily: "var(--font-jakarta)",
-          fontSize: "clamp(13px, 0.9vw, 14.5px)",
-          fontWeight: 400,
-          color: "#4A5568",
+          fontSize: "clamp(15px, 1.05vw, 17px)",
+          fontWeight: 450,
+          color: "#24334f",
           lineHeight: 1.6,
           letterSpacing: "-0.01em",
         }}>
