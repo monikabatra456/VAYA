@@ -1,0 +1,201 @@
+/* src/components/meetVaya2.module.css */
+.section {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  background-color: #1a110a;
+  overflow: hidden;
+}
+
+.sceneWrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, calc(100svh * 1672 / 940));
+  aspect-ratio: 1672 / 940;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+  background: url('/meet-vaya-clean.jpg') no-repeat center center;
+  background-size: 100% 100%;
+}
+
+/* Brand block centered at left 21.2%, top 8% */
+.brandBlock {
+  position: absolute;
+  left: 21.2%;
+  top: 8%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.brandLogo {
+  width: 5.2cqw;
+  height: auto;
+  display: block;
+}
+
+.brandName {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #F4E9D8;
+  margin-top: 0.6cqw;
+  text-transform: uppercase;
+}
+
+.brandTagline {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 0.72cqw;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: rgba(244, 233, 216, 0.85);
+  margin-top: 0.3cqw;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Thin gold accent lines to left and right of tagline at top 21% */
+.goldLineLeft {
+  position: absolute;
+  left: 10.3%;
+  top: 21%;
+  width: 4.9%;
+  height: 1px;
+  background-color: #E9B35E;
+  opacity: 0.7;
+}
+
+.goldLineRight {
+  position: absolute;
+  left: 27.1%;
+  top: 21%;
+  width: 5.0%;
+  height: 1px;
+  background-color: #E9B35E;
+  opacity: 0.7;
+}
+
+/* Headline */
+.headline {
+  position: absolute;
+  left: 10.65%;
+  top: 27.5%;
+  width: 33%;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 2.55cqw;
+  line-height: 1.15;
+  color: #F4E9D8;
+  z-index: 10;
+}
+
+.headlineGold {
+  color: #E9B35E;
+}
+
+/* Paragraph */
+.paragraph {
+  position: absolute;
+  left: 10.8%;
+  top: 59.5%;
+  width: 30%;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 1.22cqw;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+  z-index: 10;
+}
+
+/* Gold short divider */
+.divider {
+  position: absolute;
+  left: 10.8%;
+  top: 70.4%;
+  width: 5.5%;
+  height: 2px;
+  background-color: #E9B35E;
+  z-index: 10;
+}
+
+/* Icon Row: 3 items with circular gold outlines */
+.iconRow {
+  position: absolute;
+  left: 10.8%;
+  top: 73.2%;
+  width: 30.5%;
+  height: 13%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.iconItem {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.iconCircle {
+  width: 3.5cqw;
+  height: 3.5cqw;
+  border-radius: 50%;
+  border: 1.5px solid #E9B35E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E9B35E;
+  background: rgba(26, 17, 10, 0.4);
+}
+
+.iconLabel {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 1.1cqw;
+  font-weight: 500;
+  color: #F4E9D8;
+  margin-top: 0.6cqw;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Vertical dividers between icons */
+.vertDivider1 {
+  position: absolute;
+  left: 20.4%;
+  top: 74%;
+  height: 9%;
+  width: 1px;
+  background-color: #E9B35E;
+  opacity: 0.5;
+  z-index: 10;
+}
+
+.vertDivider2 {
+  position: absolute;
+  left: 32.2%;
+  top: 74%;
+  height: 9%;
+  width: 1px;
+  background-color: #E9B35E;
+  opacity: 0.5;
+  z-index: 10;
+}
+
+/* Phone Screen Video */
+.phoneVideo {
+  position: absolute;
+  left: 61.3%;
+  top: 20.4%;
+  width: 14.95%;
+  height: 62.2%;
+  border-radius: 1.7cqw;
+  overflow: hidden;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
