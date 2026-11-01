@@ -1419,6 +1419,10 @@
   .mv-plate-wrapper {
     position: absolute;
     inset: 0;
+    /* base rule centres the plate with top/left 50% + translate(-50%,-50%);
+       inset:0 alone left that translate active and shifted the whole plate
+       (and the text inside it) half a screen up/left. */
+    transform: none;
     width: 100%;
     height: 100%;
     opacity: 0.35;
