@@ -35,7 +35,7 @@ export default function Nav({ onWaitlist }: NavProps) {
   const headerSlot = useRef<HTMLDivElement>(null);
   const railSlot   = useRef<HTMLDivElement>(null);
   const linkEls    = useRef<(HTMLButtonElement | null)[]>([]);
-  const prevOnHome = useRef<boolean | null>(null);
+  const prevOnHome = useRef<boolean>(true);
 
   useEffect(() => {
     setMounted(true);
@@ -130,13 +130,8 @@ export default function Nav({ onWaitlist }: NavProps) {
     const links = linkEls.current.filter(Boolean) as HTMLButtonElement[];
     if (!hs || !rs || !links.length || isMobile) return;
 
-    // Initial mount: attach buttons to headerSlot (or railSlot if starting off-home)
-    if (prevOnHome.current === null) {
-      if (onHome) links.forEach((el) => hs.appendChild(el));
-      else        links.forEach((el) => rs.appendChild(el));
-      prevOnHome.current = onHome;
-      return;
-    }
+    if (prevOnHome.current === onHome) return;
+    prevOnHome.current = onHome;
 
     if (prevOnHome.current === onHome) return;
     prevOnHome.current = onHome;
@@ -172,7 +167,7 @@ export default function Nav({ onWaitlist }: NavProps) {
         gsap.set(links, { clearProps: "all" });
       },
     });
-  }, [onHome, isMobile, isReduced]);
+  }, [onHome, isMobile, isReduced, mounted]);
 
   // Update data-active imperatively on moved buttons
   useEffect(() => {
@@ -240,7 +235,24 @@ export default function Nav({ onWaitlist }: NavProps) {
             ref={headerSlot}
             aria-label="Header navigation"
             className="nav-header-slot"
-          />
+          >
+            {NAV_PAGES.map((page, i) => (
+              <button
+                key={page.id}
+                ref={(el) => { linkEls.current[i] = el; }}
+                data-nav-id={page.id}
+                data-active={activeId === page.id ? "true" : "false"}
+                onClick={() => scrollTo(page.id)}
+                aria-current={activeId === page.id ? "page" : undefined}
+                className="vaya-nav-btn"
+              >
+                <span className="vaya-nav-dot" aria-hidden="true" />
+                <span className="vaya-nav-roman">{page.roman}</span>
+                <span className="vaya-nav-label">{page.label}</span>
+                <span className="vaya-nav-underline" aria-hidden="true" />
+              </button>
+            ))}
+          </nav>
         )}
 
         {/* Right: Login + Join Waitlist */}
@@ -322,27 +334,7 @@ export default function Nav({ onWaitlist }: NavProps) {
         document.body
       )}
 
-      {/* ── Hidden link element factory (Flip moves them between slots) ────────── */}
-      {!isMobile && (
-        <div aria-hidden="true" style={{ display: "none" }}>
-          {NAV_PAGES.map((page, i) => (
-            <button
-              key={page.id}
-              ref={(el) => { linkEls.current[i] = el; }}
-              data-nav-id={page.id}
-              data-active={activeId === page.id ? "true" : "false"}
-              onClick={() => scrollTo(page.id)}
-              aria-current={activeId === page.id ? "page" : undefined}
-              className="vaya-nav-btn"
-            >
-              <span className="vaya-nav-dot" aria-hidden="true" />
-              <span className="vaya-nav-roman">{page.roman}</span>
-              <span className="vaya-nav-label">{page.label}</span>
-              <span className="vaya-nav-underline" aria-hidden="true" />
-            </button>
-          ))}
-        </div>
-      )}
+
 
       {/* ── MOBILE: 5 small 6px dots on right edge ─────────────────────────── */}
       {isMobile && !onHome && (

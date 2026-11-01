@@ -148,6 +148,7 @@ export default function WaitlistModal({ onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label="Join the VAYA waitlist"
+      className="wl-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -167,6 +168,7 @@ export default function WaitlistModal({ onClose }) {
     >
       <div
         ref={modalRef}
+        className="wl-modal"
         style={{
           position: 'relative',
           width: '100%',
