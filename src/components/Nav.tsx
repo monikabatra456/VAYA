@@ -58,6 +58,12 @@ export default function Nav({ onWaitlist }: NavProps) {
 
   // ── Scroll spy for active section ──────────────────────────────────────────
   const handleScroll = useCallback(() => {
+    // At footer, keep V ON ITS WAY active
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 150) {
+      setActiveId("on-its-way");
+      return;
+    }
+
     let found = "hero";
     for (const page of NAV_PAGES) {
       const el = document.getElementById(page.id);
