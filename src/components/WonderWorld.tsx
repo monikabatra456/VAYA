@@ -38,6 +38,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const [tapTooltip, setTapTooltip] = useState<{ x: number; y: number; text: string; id: number } | null>(null);
   const [hoveredDestId, setHoveredDestId] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [isPillVisible, setIsPillVisible] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [hoveredWmIdx, setHoveredWmIdx] = useState<number | null>(null);
 
@@ -62,6 +63,8 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     velYaw: 0,
     velPitch: 0,
     isDragging: false,
+    isPointerDown: false,
+    hasCaptured: false,
     dragStartX: 0,
     dragStartY: 0,
     lastX: 0,
@@ -243,6 +246,29 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     window.addEventListener('resize', updateDims);
     return () => window.removeEventListener('resize', updateDims);
   }, [updateDims]);
+
+  // Observe section visibility: fade out CTA pill when scrolling away from Wonder World,
+  // and reset zoom/modal so nothing leaks into neighboring sections
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        const inView = entry.isIntersecting && entry.intersectionRatio >= 0.22;
+        setIsPillVisible(inView);
+        if (!inView) {
+          setZoomLevel(1.0);
+          targetCamZ.current = 3.3;
+          setActiveModal(null);
+        }
+      },
+      { threshold: [0, 0.1, 0.22, 0.45] }
+    );
+
+    obs.observe(section);
+    return () => obs.disconnect();
+  }, []);
 
   // Touch devices: gentle auto-sweep on watermark when section enters viewport (Change 2)
   useEffect(() => {
@@ -478,8 +504,9 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       return;
     }
 
-    rot.current.isDragging = true;
-    setHasInteracted(true);
+    rot.current.isPointerDown = true;
+    rot.current.isDragging = false;
+    rot.current.hasCaptured = false;
     rot.current.dragStartX = e.clientX;
     rot.current.dragStartY = e.clientY;
     rot.current.lastX = e.clientX;
@@ -494,19 +521,55 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       rot.current.idleTimer = null;
     }
 
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {
-      // Ignore
+    // For mouse/pen, capture immediately. For touch, wait until we verify horizontal vs vertical gesture
+    if (e.pointerType !== 'touch') {
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        rot.current.hasCaptured = true;
+        rot.current.isDragging = true;
+        setHasInteracted(true);
+      } catch {
+        // Ignore
+      }
     }
   }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!rot.current.isDragging) return;
+    if (!rot.current.isPointerDown && !rot.current.isDragging) return;
+
     const dx = e.clientX - rot.current.lastX;
     const dy = e.clientY - rot.current.lastY;
     const moveDist = Math.hypot(e.clientX - rot.current.dragStartX, e.clientY - rot.current.dragStartY);
     rot.current.totalMove = Math.max(rot.current.totalMove, moveDist);
+
+    // If pointer was not captured yet (touch pointer)
+    if (!rot.current.hasCaptured) {
+      if (moveDist < 8) return; // 8px dead-zone
+
+      const totalDx = Math.abs(e.clientX - rot.current.dragStartX);
+      const totalDy = Math.abs(e.clientY - rot.current.dragStartY);
+
+      if (e.pointerType === 'touch') {
+        if (totalDy > totalDx) {
+          // Vertical swipe: user intends to scroll the page! Cancel pointer down so browser handles native scroll
+          rot.current.isPointerDown = false;
+          rot.current.isDragging = false;
+          return;
+        }
+      }
+
+      // Horizontal gesture on touch, or general move: capture and drag globe
+      rot.current.isDragging = true;
+      rot.current.hasCaptured = true;
+      setHasInteracted(true);
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (!rot.current.isDragging) return;
 
     const now = performance.now();
     const dt = Math.max(1, now - rot.current.lastTime);
@@ -523,28 +586,37 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!rot.current.isDragging) return;
-    rot.current.isDragging = false;
+    const wasDragging = rot.current.isDragging;
+    const hadCaptured = rot.current.hasCaptured;
+    const totalMove = rot.current.totalMove;
 
-    try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore
+    rot.current.isPointerDown = false;
+    rot.current.isDragging = false;
+    rot.current.hasCaptured = false;
+
+    if (hadCaptured) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore
+      }
     }
 
-    if (rot.current.totalMove < 6) {
+    if (totalMove < 8) {
       handleTapOnGlobe(e.clientX, e.clientY);
     }
 
     // After release for 2.5s, ease tilt back to 18 degrees and resume auto-rotate
-    if (rot.current.idleTimer) clearTimeout(rot.current.idleTimer);
-    rot.current.idleTimer = setTimeout(() => {
-      gsap.to(rot.current, {
-        pitch: INITIAL_PITCH,
-        duration: 1.4,
-        ease: 'power2.out',
-      });
-    }, 2500);
+    if (wasDragging) {
+      if (rot.current.idleTimer) clearTimeout(rot.current.idleTimer);
+      rot.current.idleTimer = setTimeout(() => {
+        gsap.to(rot.current, {
+          pitch: INITIAL_PITCH,
+          duration: 1.4,
+          ease: 'power2.out',
+        });
+      }, 2500);
+    }
   }, [handleTapOnGlobe]);
 
   // ── Wheel Event (Plain wheel scrolls page, ONLY Ctrl+wheel zooms) ─────────
@@ -552,8 +624,10 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 0.08 : -0.08;
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
+      const maxZoom = isMobile ? 1.6 : 2.2;
       setZoomLevel((prev) => {
-        const next = Math.max(1.0, Math.min(2.2, Number((prev + zoomFactor).toFixed(2))));
+        const next = Math.max(1.0, Math.min(maxZoom, Number((prev + zoomFactor).toFixed(2))));
         targetCamZ.current = 3.3 / next;
         return next;
       });
@@ -563,8 +637,10 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   // Button Zoom Handlers (+ / − / X)
   const handleZoomIn = () => {
     setHasInteracted(true);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
+    const maxZoom = isMobile ? 1.6 : 2.2;
     setZoomLevel((prev) => {
-      const next = Math.min(2.2, Number((prev + 0.3).toFixed(1)));
+      const next = Math.min(maxZoom, Number((prev + 0.3).toFixed(1)));
       targetCamZ.current = 3.3 / next;
       return next;
     });
@@ -1545,7 +1621,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
         </div>
 
         {/* Dark Navy Glass CTA Pill */}
-        <div className="ww-cta-pill">
+        <div className="ww-cta-pill" style={{ opacity: isPillVisible ? 1 : 0, pointerEvents: isPillVisible ? "auto" : "none" }}>
           <div className="ww-cta-left">
             <span className="ww-cta-bar" aria-hidden="true" />
             <span className="ww-cta-label">Your wonder is</span>

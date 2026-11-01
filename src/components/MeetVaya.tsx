@@ -427,8 +427,28 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
 
   }, [activeFeature, isSectionInView]);
 
+  // Mobile: auto-cycle activeFeature (0 -> 1 -> 2 -> 0) every 2.8s when section is in view
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+    if (!isMobile || !isSectionInView) return;
 
+    const timer = setInterval(() => {
+      setActiveFeature((prev) => {
+        const next = (prev + 1) % 3;
+        featureItemRefs.current.forEach((el, i) => {
+          if (!el) return;
+          if (i === next) el.classList.add('active');
+          else el.classList.remove('active');
+        });
+        return next;
+      });
+    }, 2800);
+
+    return () => clearInterval(timer);
+  }, [isSectionInView]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     gsap.registerPlugin(ScrollTrigger);
@@ -436,251 +456,170 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
     const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (isReduced) {
-
       if (phoneStageRef.current) gsap.set(phoneStageRef.current, { yPercent: 0, rotation: 0, opacity: 1 });
-
       featureItemRefs.current.forEach(el => el?.classList.add('active'));
-
       applyRevealProgress(1);
-
       return;
-
     }
 
-    updateActiveFeature(0);
+    const mm = gsap.matchMedia();
 
-    // Initial setups for phone stage
+    // ── DESKTOP (>= 1024px): original pinned scrub and tilt ───────────────────
+    mm.add('(min-width: 1024px)', () => {
+      updateActiveFeature(0);
+      gsap.set(phoneStageRef.current, { yPercent: 0, rotation: 0, opacity: 1 });
 
-    gsap.set(phoneStageRef.current, { yPercent: 0, rotation: 0, opacity: 1 });
-
-    // Idle life: floating animation for phone stage (+-3px, 3.8s sine)
-
-    const idleFloat = gsap.to(phoneStageRef.current, {
-
-      y: '+=6',
-
-      duration: 3.8,
-
-      ease: 'sine.inOut',
-
-      repeat: -1,
-
-      yoyo: true,
-
-      paused: false,
-
-    });
-
-    // Mouse tilt handler (up to 3.5deg)
-
-    const handleMouseMove = (e: MouseEvent) => {
-
-      if (!sectionRef.current || !phoneStageRef.current) return;
-
-      const r = sectionRef.current.getBoundingClientRect();
-
-      const nx = (e.clientX - r.left) / r.width - 0.5;
-
-      const ny = (e.clientY - r.top) / r.height - 0.5;
-
-      gsap.to(phoneStageRef.current, {
-
-        rotateY: nx * 3.5,
-
-        rotateX: -ny * 3.5,
-
-        duration: 0.8,
-
-        ease: 'power2.out',
-
+      const idleFloat = gsap.to(phoneStageRef.current, {
+        y: '+=6',
+        duration: 3.8,
+        ease: 'sine.inOut',
+        repeat: -1,
+        yoyo: true,
+        paused: false,
       });
 
-    };
-
-    const sectionEl = sectionRef.current;
-
-    if (sectionEl) {
-
-      sectionEl.addEventListener('mousemove', handleMouseMove);
-
-    }
-
-    // ── ENTRY SCROLLTRIGGER: Text reveal scrub ─────────────────────────────
-
-    // Starts when section top reaches 85% of viewport height; completes when top reaches 0 (before pin).
-
-    const entryST = ScrollTrigger.create({
-
-      trigger: sectionRef.current,
-
-      start: 'top 85%',
-
-      end: 'top top',
-
-      scrub: true,
-
-      onUpdate: (self) => {
-
-        applyRevealProgress(self.progress);
-
-      },
-
-    });
-
-    // Check if entered without scrolling through (refresh at section, anchor link)
-
-    if (sectionRef.current) {
-
-      const bcr = sectionRef.current.getBoundingClientRect();
-
-      if (bcr.top <= 10 && bcr.bottom > 100) {
-
-        const autoObj = { p: 0 };
-
-        gsap.to(autoObj, {
-
-          p: 1,
-
-          duration: 1.4,
-
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!sectionRef.current || !phoneStageRef.current) return;
+        const r = sectionRef.current.getBoundingClientRect();
+        const nx = (e.clientX - r.left) / r.width - 0.5;
+        const ny = (e.clientY - r.top) / r.height - 0.5;
+        gsap.to(phoneStageRef.current, {
+          rotateY: nx * 3.5,
+          rotateX: -ny * 3.5,
+          duration: 0.8,
           ease: 'power2.out',
-
-          onUpdate: () => applyRevealProgress(autoObj.p),
-
         });
+      };
 
-      } else {
-
-        applyRevealProgress(entryST.progress);
-
+      const sectionEl = sectionRef.current;
+      if (sectionEl) {
+        sectionEl.addEventListener('mousemove', handleMouseMove);
       }
 
-    }
+      const entryST = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 85%',
+        end: 'top top',
+        scrub: true,
+        onUpdate: (self) => {
+          applyRevealProgress(self.progress);
+        },
+      });
 
-    // ── PINNED TIMELINE: 3-step interactive scroll (duration unchanged) ───
+      if (sectionRef.current) {
+        const bcr = sectionRef.current.getBoundingClientRect();
+        if (bcr.top <= 10 && bcr.bottom > 100) {
+          const autoObj = { p: 0 };
+          gsap.to(autoObj, {
+            p: 1,
+            duration: 1.4,
+            ease: 'power2.out',
+            onUpdate: () => applyRevealProgress(autoObj.p),
+          });
+        } else {
+          applyRevealProgress(entryST.progress);
+        }
+      }
 
-    const tl = gsap.timeline({
+      const tl = gsap.timeline({
+        paused: true,
+        defaults: { ease: 'power2.inOut' },
+      });
 
-      paused: true,
+      tl.to(phoneStageRef.current, {
+        yPercent: 0,
+        rotation: 0,
+        opacity: 1,
+        duration: 0.12,
+        ease: 'power3.out',
+      }, 0.00);
 
-      defaults: { ease: 'power2.inOut' },
+      tl.to(plateWrapRef.current, {
+        scale: 1.05,
+        duration: 1.0,
+        ease: 'none',
+      }, 0.00);
 
+      tl.call(() => updateActiveFeature(0), [], 0.12);
+      tl.call(() => updateActiveFeature(1), [], 0.42);
+      tl.call(() => updateActiveFeature(2), [], 0.72);
+
+      tl.to('.mv-left-col', {
+        y: -30,
+        opacity: 0,
+        duration: 0.12,
+        ease: 'power2.in',
+      }, 0.88);
+
+      const st = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        pin: true,
+        start: 'top top',
+        end: '+=320%',
+        scrub: 0.6,
+        anticipatePin: 1,
+        animation: tl,
+        onUpdate: (self) => {
+          const p = self.progress;
+          if (p < 0.38) {
+            updateActiveFeature(0);
+          } else if (p < 0.72) {
+            updateActiveFeature(1);
+          } else {
+            updateActiveFeature(2);
+          }
+        },
+      });
+
+      return () => {
+        entryST.kill();
+        st.kill();
+        tl.kill();
+        idleFloat.kill();
+        if (tapTweenRef.current) tapTweenRef.current.kill();
+        if (sectionEl) {
+          sectionEl.removeEventListener('mousemove', handleMouseMove);
+        }
+      };
     });
 
-    // Phone stage entrance
+    // ── MOBILE / TABLET (< 1024px): no pin, clean reveal, clear transforms ───
+    mm.add('(max-width: 1023px)', () => {
+      if (plateWrapRef.current) gsap.set(plateWrapRef.current, { clearProps: 'all' });
+      if (phoneStageRef.current) gsap.set(phoneStageRef.current, { clearProps: 'transform', opacity: 1 });
 
-    tl.to(phoneStageRef.current, {
+      updateActiveFeature(0);
 
-      yPercent: 0,
+      const mobileST = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          const autoObj = { p: 0 };
+          gsap.to(autoObj, {
+            p: 1,
+            duration: 1.1,
+            ease: 'power2.out',
+            onUpdate: () => applyRevealProgress(autoObj.p),
+          });
+        },
+      });
 
-      rotation: 0,
-
-      opacity: 1,
-
-      duration: 0.12,
-
-      ease: 'power3.out',
-
-    }, 0.00);
-
-    // Plate scales slowly 1.00 -> 1.05 across entire pinned scroll
-
-    tl.to(plateWrapRef.current, {
-
-      scale: 1.05,
-
-      duration: 1.0,
-
-      ease: 'none',
-
-    }, 0.00);
-
-    // 0.12 - 0.42: Step 0 Smarter Travel
-
-    tl.call(() => updateActiveFeature(0), [], 0.12);
-
-    // 0.42 - 0.72: Step 1 Data-Driven Decisions
-
-    tl.call(() => updateActiveFeature(1), [], 0.42);
-
-    // 0.72 - 1.00: Step 2 Better Experiences
-
-    tl.call(() => updateActiveFeature(2), [], 0.72);
-
-    // Text block exit: translateY 0 -> -30px and opacity 1 -> 0 when scrolling out of section
-
-    tl.to('.mv-left-col', {
-
-      y: -30,
-
-      opacity: 0,
-
-      duration: 0.12,
-
-      ease: 'power2.in',
-
-    }, 0.88);
-
-    // Pinned ScrollTrigger
-
-    const st = ScrollTrigger.create({
-
-      trigger: sectionRef.current,
-
-      pin: true,
-
-      start: 'top top',
-
-      end: '+=320%',
-
-      scrub: 0.6,
-
-      anticipatePin: 1,
-
-      animation: tl,
-
-      onUpdate: (self) => {
-
-        const p = self.progress;
-
-        if (p < 0.38) {
-
-          updateActiveFeature(0);
-
-        } else if (p < 0.72) {
-
-          updateActiveFeature(1);
-
-        } else {
-
-          updateActiveFeature(2);
-
+      if (sectionRef.current) {
+        const bcr = sectionRef.current.getBoundingClientRect();
+        if (bcr.top < window.innerHeight * 0.75) {
+          applyRevealProgress(1);
         }
+      }
 
-      },
-
+      return () => {
+        mobileST.kill();
+      };
     });
 
     return () => {
-
-      entryST.kill();
-
-      st.kill();
-
-      tl.kill();
-
-      idleFloat.kill();
-
-      if (tapTweenRef.current) tapTweenRef.current.kill();
-
-      if (sectionEl) {
-
-        sectionEl.removeEventListener('mousemove', handleMouseMove);
-
-      }
-
+      mm.revert();
     };
-
   }, [applyRevealProgress]);
 
   return (

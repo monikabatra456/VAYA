@@ -1412,21 +1412,62 @@
     position: relative;
     padding: 100px 20px 60px;
     overflow: hidden;
-    background: #1a1614;
+    background: #140c07 !important;
+    background-color: #140c07 !important;
+    margin-top: 0 !important;
     display: block !important;
+    z-index: 10 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .mv-plate-wrapper {
-    position: absolute;
-    inset: 0;
-    /* base rule centres the plate with top/left 50% + translate(-50%,-50%);
-       inset:0 alone left that translate active and shifted the whole plate
-       (and the text inside it) half a screen up/left. */
-    transform: none;
-    width: 100%;
-    height: 100%;
-    opacity: 0.35;
-    pointer-events: none;
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .mv-window-scene-viewport,
+  .mv-plate-img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    opacity: 0.55 !important;
+    pointer-events: none !important;
+  }
+
+  .mv-window-bg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .mv-window-bloom {
+    display: none !important;
+  }
+
+  .mv-gradient-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(180deg, rgba(20,12,7,.92) 0%, rgba(20,12,7,.75) 45%, rgba(20,12,7,.45) 100%) !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
   }
 
   .mv-content-container {
@@ -1441,72 +1482,86 @@
   }
 
   .mv-left-col {
-    position: relative;
-    left: auto;
-    top: auto;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
     transform: none !important;
-    width: 100%;
-    max-width: 480px;
-    align-items: center;
-    text-align: center;
+    width: 100% !important;
+    max-width: 520px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    z-index: 10 !important;
+    opacity: 1 !important;
   }
 
   .mv-headline {
-    font-size: clamp(26px, 5.8vw, 36px);
-    line-height: 1.22;
-    margin-bottom: 16px;
+    font-size: clamp(26px, 7.2vw, 34px) !important;
+    line-height: 1.25 !important;
+    margin-bottom: 16px !important;
+    opacity: 1 !important;
+    text-align: center !important;
   }
 
   .mv-paragraph {
-    font-size: 15px;
-    line-height: 1.45;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    opacity: 1 !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+  }
+
+  .mv-subtext-line-mask {
+    overflow: visible !important;
+    display: inline !important;
+  }
+
+  .mv-subtext-line {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .mv-gold-line {
-    margin: 16px auto;
+    margin: 16px auto !important;
+    transform: scaleX(1) !important;
   }
 
   .mv-features {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
+    max-width: 360px;
     gap: 10px;
-    margin-top: 20px;
+    margin: 20px auto 0;
   }
 
   .mv-feature-divider {
-    display: none;
+    display: none !important;
   }
 
   .mv-feature-item {
-    width: 100%;
-    justify-content: flex-start;
-    padding: 10px 16px;
-    border-radius: 12px;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 10px 16px !important;
+    border-radius: 12px !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
-  .mv-phone-wrap {
-    width: 260px;
-    margin: 8px auto;
-  }
-}
-
-
-
-
-/* ── Mobile/Tablet (<=1023px) Seam B & Background Fixes ── */
-@media (max-width: 1023px) {
-  .mv-section {
-    background: transparent !important;
-    background-color: transparent !important;
-    margin-top: -80px !important;
+  .mv-phone-stage {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: min(78vw, 300px) !important;
+    margin: 32px auto 0 !important;
+    aspect-ratio: 851 / 1292 !important;
+    height: auto !important;
     z-index: 10 !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  .mv-plate-wrapper {
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
-    mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
+    opacity: 1 !important;
+    display: block !important;
   }
 }

@@ -16,6 +16,7 @@ export default function SmoothScroll() {
 
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.clearScrollMemory();
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -30,7 +31,8 @@ export default function SmoothScroll() {
         gestureOrientation: 'vertical',
         smoothWheel: true,
         wheelMultiplier: 0.95,
-        touchMultiplier: 1.5,
+        touchMultiplier: 0, // Disable Lenis touch hijacking so mobile/tablet has native touch scrolling
+        syncTouch: false,
       });
 
       (window as any).lenis = lenisInstance;
@@ -53,6 +55,11 @@ export default function SmoothScroll() {
       if (typeof window !== 'undefined') {
         window.addEventListener('load', () => {
           ScrollTrigger.refresh();
+        });
+        window.addEventListener('orientationchange', () => {
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, 200);
         });
       }
     });

@@ -1055,16 +1055,26 @@
   }
 }
 
-/* ── Mobile/Tablet (<=1023px) Seam A (80px blend) ── */
+/* ── Mobile/Tablet (<=1023px) Seam A (80px blend) & Mobile Polish ── */
 @media (max-width: 1023px) {
   .ww-section {
     background:
       radial-gradient(ellipse 70% 50% at 50% 80%, rgba(255, 230, 180, 0.45), transparent 75%),
       linear-gradient(180deg, #F6F1E7 0%, #faf0dc 35%, #f7e6ca 65%, #f4d8b0 calc(100% - 80px), transparent 100%);
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .ww-bg-landscape {
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 80px), transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 80px), transparent 100%);
+  }
+
+  .ww-cta-pill {
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .ww-canvas {
+    touch-action: pan-y !important;
   }
 }

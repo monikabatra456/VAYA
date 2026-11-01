@@ -147,7 +147,7 @@ export default function Section2() {
 
   // ── Detect mobile / reduced motion ─────────────────────────────────────────
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 1023px)').matches);
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setIsReduced(mq.matches);
     mq.addEventListener("change", (e) => setIsReduced(e.matches));

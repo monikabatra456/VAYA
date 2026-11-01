@@ -43,7 +43,7 @@ export default function Nav({ onWaitlist }: NavProps) {
 
   // ── Detect mobile + reduced motion ─────────────────────────────────────────
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 1023px)').matches);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");

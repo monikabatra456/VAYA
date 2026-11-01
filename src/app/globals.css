@@ -658,13 +658,13 @@ html, body {
 
 /* ── Mobile/Tablet Fluid Typography and Layout Rules ── */
 @media (max-width: 1023px) {
-  h1 {
-    font-size: clamp(2.1rem, 9vw, 3.2rem) !important;
-    line-height: 1.15 !important;
+  .fluid-h1 {
+    font-size: clamp(2.1rem, 9vw, 3.2rem);
+    line-height: 1.15;
   }
-  h2 {
-    font-size: clamp(1.7rem, 7vw, 2.4rem) !important;
-    line-height: 1.2 !important;
+  .fluid-h2 {
+    font-size: clamp(1.7rem, 7vw, 2.4rem);
+    line-height: 1.2;
   }
   body, p, input, select, textarea, button {
     line-height: 1.5;
