@@ -54,7 +54,7 @@ export default function ProblemPopup({
 
   // ── Detect mobile ──────────────────────────────────────────────────────────
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
+    const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -270,17 +270,6 @@ export default function ProblemPopup({
         aria-modal="true"
         aria-label={`${problem.title} Preview`}
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => {
-          (panelRef.current as any)._touchStartY = e.touches[0].clientY;
-        }}
-        onTouchEnd={(e) => {
-          const startY = (panelRef.current as any)._touchStartY;
-          if (startY === undefined) return;
-          const endY = e.changedTouches[0].clientY;
-          if (endY - startY > 60) {
-            handleClose();
-          }
-        }}
         style={{
           position: "fixed",
           top: sourceRect?.top ?? 60,
@@ -301,19 +290,6 @@ export default function ProblemPopup({
           overflow: "hidden",
         }}
       >
-        {/* Swipe down pull bar on mobile */}
-        {isMobile && (
-          <div
-            style={{
-              width: "36px",
-              height: "4px",
-              borderRadius: "2px",
-              background: "rgba(255, 255, 255, 0.35)",
-              marginBottom: "12px",
-              flexShrink: 0,
-            }}
-          />
-        )}
         {/* ── Top Header Row inside Panel: Close X on left, White Pill Chip on right ── */}
         <div
           style={{
@@ -332,8 +308,8 @@ export default function ProblemPopup({
             onClick={handleClose}
             aria-label="Close popup"
             style={{
-              width: isMobile ? "44px" : "36px",
-              height: isMobile ? "44px" : "36px",
+              width: "36px",
+              height: "36px",
               borderRadius: "50%",
               display: "inline-flex",
               alignItems: "center",

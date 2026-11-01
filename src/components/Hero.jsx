@@ -63,7 +63,7 @@ function BirdSVG({ scale }) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function Hero({ onWaitlist }) {
+export default function Hero() {
   const wrapperRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -101,7 +101,7 @@ export default function Hero({ onWaitlist }) {
 
     let W      = window.innerWidth;
     let H      = window.innerHeight;
-    let mobile = W < 1024;
+    let mobile = W < 768;
     setIsMobile(mobile);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -114,7 +114,7 @@ export default function Hero({ onWaitlist }) {
     function computeLayout() {
       W      = window.innerWidth;
       H      = window.innerHeight;
-      mobile = W < 1024;
+      mobile = W < 768;
       setIsMobile(mobile);
 
       const scrollLen = ((mobile ? C.SCROLL_LENGTH_MOBILE : C.SCROLL_LENGTH) / 100) * H;
@@ -123,7 +123,7 @@ export default function Hero({ onWaitlist }) {
       const rect = wrapper.getBoundingClientRect();
       wrapperTop = rect.top + window.scrollY;
 
-      const planeVw = mobile ? 62 : C.PLANE_WIDTH_DESKTOP;
+      const planeVw = mobile ? C.PLANE_WIDTH_MOBILE : C.PLANE_WIDTH_DESKTOP;
       planeW = (planeVw / 100) * W;
       planeH = planeW * 0.31;
 
@@ -456,10 +456,7 @@ export default function Hero({ onWaitlist }) {
 
         {/* ── 6. SCENE B (z60) ─────────────────────────────────────────────── */}
         <div ref={sceneBRef} style={layerStyle(Z.sceneB, { transformOrigin: "50% 50%", opacity: 0 })}>
-          <picture>
-            <source media="(max-width: 1023px)" srcSet="/hero/scene-b-mobile.webp"/>
-            <img src={SCENE_B_SRC} alt="VAYA Alpine Lake" className="hero-bg-layer" style={{ objectPosition: "50% 50%" }} draggable={false}/>
-          </picture>
+          <img src={SCENE_B_SRC} alt="VAYA Alpine Lake" className="hero-bg-layer" style={{ objectPosition: "50% 50%" }} draggable={false}/>
         </div>
 
         {/* ── 7. VIGNETTE — "mountain walls closing in" (z65) ──────────────── */}
@@ -492,7 +489,7 @@ export default function Hero({ onWaitlist }) {
           style={{ position: "absolute", inset: 0, zIndex: Z.scene2, pointerEvents: "none", opacity: 0 }}
         >
           {BIRD_DEFS.map((def, i) => {
-            if (isMobile && i >= 2) return null;
+            if (isMobile && i >= 3) return null;
             const bSize = isMobile ? def.scale * 0.7 : def.scale;
             return (
               <div
@@ -527,39 +524,6 @@ export default function Hero({ onWaitlist }) {
           <div className="hero-text-scrim" style={{ zIndex: Z.scrim }}/>
           <p ref={tag1Ref} className="hero-tag1" style={{ opacity: 0, transform: "translateY(24px)" }}>Know before you go</p>
           <p ref={tag2Ref} className="hero-tag2" style={{ opacity: 0, transform: "translateY(24px)" }}>Step in, step out</p>
-          {isMobile && (
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
-                top: "calc(22vh + clamp(165px, 36vw, 210px))",
-                zIndex: 110,
-                pointerEvents: "auto",
-              }}
-            >
-              <button
-                type="button"
-                onClick={onWaitlist}
-                style={{
-                  height: "46px",
-                  padding: "0 28px",
-                  borderRadius: "9999px",
-                  background: "#14213d",
-                  color: "#FFFFFF",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  fontFamily: "var(--font-jakarta)",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 18px rgba(20, 33, 61, 0.3)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Join Waitlist →
-              </button>
-            </div>
-          )}
         </div>
 
         {/* ── 10. SCROLL CUE (z110) ─────────────────────────────────────────── */}
@@ -568,7 +532,7 @@ export default function Hero({ onWaitlist }) {
           <span aria-hidden="true">⌄</span>
         </div>
 
-        {/* ── Seamless transition into Section 2 cream (#F6F0E4) ── */}
+        {/* ── Seamless transition into Section 2 beige (#F7F2E7) ── */}
         <div
           aria-hidden="true"
           style={{
@@ -576,14 +540,15 @@ export default function Hero({ onWaitlist }) {
             bottom: 0,
             left: 0,
             right: 0,
-            height: "28svh",
+            height: isMobile ? "120px" : "clamp(140px, 18vh, 190px)",
             pointerEvents: "none",
             zIndex: Z.sceneB + 1,
             background: `linear-gradient(
               to bottom,
-              rgba(246, 240, 228, 0) 0%,
-              rgba(246, 240, 228, 0.4) 45%,
-              #F6F0E4 100%
+              rgba(247, 242, 231, 0) 0%,
+              rgba(247, 242, 231, 0.25) 40%,
+              rgba(247, 242, 231, 0.75) 75%,
+              #F7F2E7 100%
             )`,
           }}
         />
