@@ -5,44 +5,20 @@
 /* ── MEET VAYA SECTION ─────────────────────────────────────────────── */
 
 .mv-section {
-
   position: relative;
-
   height: 100vh;
-
   height: 100svh;
-
   overflow: hidden;
-
   background: #1a110a;
-
   user-select: none;
-
+  margin-top: -1px;
 }
 
 
 
 /* ── TOP SEAM: fades from Wonder World's bottom colour ─────────────── */
 
-.mv-seam {
 
-  position: absolute;
-
-  top: 0;
-
-  left: 0;
-
-  right: 0;
-
-  height: 160px;
-
-  background: linear-gradient(to bottom, #f4d8b0 0%, transparent 100%);
-
-  z-index: 5;
-
-  pointer-events: none;
-
-}
 
 
 
@@ -585,27 +561,9 @@
   overflow-x: hidden;
 }
 
-.seam-in-4 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-  background: linear-gradient(to bottom, #140A04 0%, rgba(20, 10, 4, 0.6) 50%, transparent 100%);
-  pointer-events: none;
-  z-index: 6;
-}
 
-.seam-4-5 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 260px;
-  background: linear-gradient(to bottom, transparent 0%, rgba(247, 238, 222, 0.6) 60%, #F9F0E1 100%);
-  pointer-events: none;
-  z-index: 6;
-}
+
+
 
 
 
@@ -1521,4 +1479,17 @@
     width: 260px;
     margin: 8px auto;
   }
+}
+
+
+/* Seam A: Blend from Page 3 into Page 4 */
+.seam-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 240px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to bottom, #2A1A0E 0%, rgba(42, 26, 14, 0.6) 40%, transparent 100%);
 }

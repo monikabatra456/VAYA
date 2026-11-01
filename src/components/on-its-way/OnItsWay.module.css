@@ -166,7 +166,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  z-index: 12;
+  z-index: 40;
   pointer-events: none;
 }
 
@@ -442,4 +442,17 @@
   .cloudsFrontLayer {
     transform: none !important;
   }
+}
+
+
+/* Seam B: Blend from Page 4 into Page 5 */
+.seamTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to bottom, #140A04 0%, rgba(20, 10, 4, 0.55) 35%, transparent 100%);
 }

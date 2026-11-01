@@ -1645,21 +1645,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
         </div>
       )}
 
-      {/* Seam between Page 3 and Page 4 */}
-      <div
-        className="seam-3-4"
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '220px',
-          pointerEvents: 'none',
-          zIndex: 30,
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(20, 10, 4, 0.55) 60%, #140A04 100%)',
-        }}
-        aria-hidden="true"
-      />
+
     </section>
   );
 }
