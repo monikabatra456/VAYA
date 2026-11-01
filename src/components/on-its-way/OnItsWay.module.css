@@ -276,21 +276,20 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 28svh;
+  height: 16svh;
   background: linear-gradient(
-    to top,
-    rgba(251, 241, 227, 0.85) 0%,
-    rgba(251, 241, 227, 0.55) 45%,
-    transparent 100%
+    to bottom,
+    transparent 0%,
+    #FBF1E3 100%
   );
   pointer-events: none;
-  z-index: 13;
+  z-index: 10;
 }
 
 /* "COMING SOON" Section inside 100svh first viewport, in cloud sea */
 .comingSoonBlock {
   position: absolute;
-  bottom: clamp(5%, 7svh, 8%);
+  bottom: 8svh;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
