@@ -1477,23 +1477,111 @@ export default function WaitlistModal({ onClose }) {
           to { transform: rotate(360deg); }
         }
 
-        /* ── Mobile (<=640px) Bottom Sheet (Rule 9) ── */
-        @media (max-width: 640px) {
+        /* ── Mobile / Tablet (<=1023px) Responsive Modal ── */
+        @media (max-width: 1023px) {
           .wl-overlay {
-            align-items: flex-end;
-            padding: 0;
+            padding: 20px;
+            overscroll-behavior: contain;
           }
 
           .wl-modal {
-            max-height: calc(100dvh - 24px);
-            border-radius: 24px 24px 0 0;
-            width: 100%;
-            max-width: 100%;
-            padding: 24px 20px max(24px, env(safe-area-inset-bottom)) 20px;
+            max-width: 540px;
+            max-height: 92vh;
+            max-height: 92dvh;
+            padding: 32px 32px calc(32px + env(safe-area-inset-bottom, 0px));
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .wl-close-btn {
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            min-height: 44px;
+            background: rgba(18, 33, 63, 0.08);
+          }
+
+          .wl-title {
+            font-size: clamp(22px, 5.4vw, 28px);
+            line-height: 1.2;
+            padding-right: 52px;
+          }
+
+          .wl-subtitle {
+            font-size: 15px;
+            margin-bottom: 18px;
+          }
+
+          .wl-floating-plane {
+            top: 8px;
+            right: 66px;
+          }
+
+          .wl-input {
+            height: 54px;
+            font-size: 16px;
+          }
+
+          .wl-role-card {
+            height: 56px;
+            min-height: 48px;
+          }
+
+          .wl-role-name {
+            font-size: 15px;
+          }
+
+          .wl-dropdown-trigger {
+            height: 54px;
+            font-size: 16px;
+          }
+
+          .wl-dropdown-menu {
+            position: relative;
+            top: auto;
+            left: auto;
+            right: auto;
+            margin-top: 8px;
+            max-height: 232px;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .wl-dropdown-item {
+            box-sizing: border-box;
+            min-height: 48px;
+            padding: 12px 14px;
+            font-size: 15px;
+          }
+
+          .wl-consent-label {
+            min-height: 44px;
+            align-items: center;
+            padding: 4px 0;
+          }
+
+          .wl-consent-text {
+            font-size: 14px;
           }
 
           .wl-submit-btn {
-            margin-bottom: max(8px, env(safe-area-inset-bottom));
+            min-height: 54px;
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .wl-overlay {
+            padding: 12px;
+          }
+
+          .wl-modal {
+            padding: 24px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+            border-radius: 20px;
+          }
+
+          .wl-roles-grid {
+            gap: 8px;
           }
         }
 
