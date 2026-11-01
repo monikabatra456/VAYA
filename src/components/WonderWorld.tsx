@@ -772,9 +772,6 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
       tex.magFilter = THREE.LinearFilter;
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.needsUpdate = true;
-      if (canvasRef.current) {
-        canvasRef.current.style.opacity = '1';
-      }
     });
 
     const bumpTexture = texLoader.load('/wonder/earth-bump.png', (tex) => {
