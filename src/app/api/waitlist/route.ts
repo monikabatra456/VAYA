@@ -6,8 +6,9 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { adminDb, adminFirestore } from '@/lib/firebase/admin';
 import { getTodayIST } from '@/lib/utils/date';
+import { VALID_PROBLEMS } from '@/lib/constants/waitlist';
 
-// Rate Limiter: In-memory (best-effort, 5 requests per 10 min per IP hash)
+// ── In-Memory Rate Limiter (Max 5 requests per 10 minutes per IP) ────────────
 const RATE_LIMIT_WINDOW = 10 * 60 * 1000;
 const MAX_REQUESTS = 5;
 const ipRateMap = new Map<string, { count: number; expiresAt: number }>();
@@ -31,11 +32,14 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-import { VALID_PROBLEMS } from '@/lib/constants/waitlist';
-
-// Validation Schema matching Task 5
+// ── Validation Schema ────────────────────────────────────────────────────────
 const WaitlistSchema = z.object({
-  email: z.string().email('Please enter a valid email address').max(120),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email('Please enter a valid email address')
+    .max(254, 'Email is too long'),
   role: z.enum(['traveller', 'local_guide']).default('traveller'),
   biggestProblem: z.enum(VALID_PROBLEMS, {
     message: 'Please select your biggest travel problem',
@@ -43,9 +47,36 @@ const WaitlistSchema = z.object({
   consent: z.literal(true, {
     message: 'You must agree to receive updates from VAYA',
   }),
-  source: z.string().max(50).optional().default('hero'),
+  source: z.string().max(50).optional().default('waitlist_modal'),
   honeypot: z.string().max(100).optional(),
+  recaptchaToken: z.string().optional(),
 });
+
+// ── Optional reCAPTCHA v3 / App Check Verification ───────────────────────────
+async function verifyRecaptcha(token?: string): Promise<boolean> {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secretKey) {
+    // If not configured in environment, skip gracefully to prevent breaking submissions
+    return true;
+  }
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
+    });
+    const result = await res.json();
+    return Boolean(result.success && (result.score === undefined || result.score >= 0.5));
+  } catch (err) {
+    console.warn('[Waitlist]: reCAPTCHA verification request error:', err);
+    // On external network error, allow submission gracefully
+    return true;
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -59,11 +90,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const rawBody = await req.json();
+    const rawBody = await req.json().catch(() => ({}));
 
-    // 2. Honeypot check
-    if (rawBody.honeypot && rawBody.honeypot.trim() !== '') {
-      console.warn('[Waitlist] Honeypot triggered, ignoring request.');
+    // 2. Honeypot check: If filled by automated bot, silently return success
+    if (rawBody.honeypot && typeof rawBody.honeypot === 'string' && rawBody.honeypot.trim() !== '') {
       return NextResponse.json({ ok: true, message: "You're on the list!" });
     }
 
@@ -71,21 +101,30 @@ export async function POST(req: Request) {
     const parseResult = WaitlistSchema.safeParse(rawBody);
     if (!parseResult.success) {
       return NextResponse.json(
-        { ok: false, error: 'Invalid submission data', details: parseResult.error.format() },
+        { ok: false, error: 'Please check your inputs and try again.' },
         { status: 400 }
       );
     }
 
     const data = parseResult.data;
-    const emailTrimmed = data.email.trim();
+
+    // 4. reCAPTCHA verification if enabled
+    const isHuman = await verifyRecaptcha(data.recaptchaToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { ok: false, error: 'Spam verification failed. Please refresh and try again.' },
+        { status: 400 }
+      );
+    }
+
+    const emailTrimmed = data.email;
     const emailLower = emailTrimmed.toLowerCase();
 
-    // Deterministic doc ID from sha256 of lowercase trimmed email
+    // Deterministic doc ID from sha256 of lowercase trimmed email (prevents duplicate documents)
     const docId = crypto.createHash('sha256').update(emailLower).digest('hex');
 
     const cookieStore = cookies();
     const visitorId = cookieStore.get('vaya_vid')?.value || null;
-
     const todayIST = getTodayIST();
 
     const submissionData = {
@@ -100,16 +139,15 @@ export async function POST(req: Request) {
       createdDay: todayIST,
     };
 
-    // If service account is not yet configured, log submission gracefully
+    // If Firebase Admin credentials are not set, return graceful response without logging PII
     if (!process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      console.warn('[Waitlist]: Service account credentials not set in .env.local. Submission payload received successfully:');
-      console.log(submissionData);
+      console.warn('[Waitlist]: Service account credentials not set in environment.');
       return NextResponse.json({ ok: true, message: 'Successfully joined the waitlist!' });
     }
 
     const submissionRef = adminDb.collection('waitlist_submissions').doc(docId);
 
-    // 4. Check if document already exists
+    // 5. Duplicate Check
     const existingDoc = await submissionRef.get();
     if (existingDoc.exists) {
       return NextResponse.json({
@@ -119,7 +157,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // 5. Batch creation
+    // 6. Atomic Batch Write
     const batch = adminDb.batch();
 
     batch.set(submissionRef, {
@@ -143,7 +181,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, message: 'Successfully joined the waitlist!' });
   } catch (err: any) {
-    console.error('[POST /api/waitlist] Error:', err);
+    console.error('[POST /api/waitlist] Internal submission error:', err?.message || err);
     return NextResponse.json(
       { ok: false, error: 'Internal server error. Please try again.' },
       { status: 500 }

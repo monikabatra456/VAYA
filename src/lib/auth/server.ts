@@ -18,6 +18,7 @@ export interface AdminAuthResult {
   user?: {
     email: string;
     uid: string;
+    admin: boolean;
   };
   error?: string;
   status?: number;
@@ -26,6 +27,7 @@ export interface AdminAuthResult {
 /**
  * Server-side helper to verify admin session.
  * Called in Server Components (admin layout/pages) and route handlers.
+ * Verifies Firebase session cookie cryptographically and validates admin claim or authorized email.
  */
 export async function requireAdmin(): Promise<AdminAuthResult> {
   const cookieStore = cookies();
@@ -41,9 +43,13 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
 
     const userEmail = (decodedClaims.email || '').toLowerCase().trim();
     const isEmailVerified = decodedClaims.email_verified === true;
+    const hasAdminClaim = decodedClaims.admin === true;
+    const isAuthorized = isAuthorizedAdmin(userEmail);
 
-    if (!isAuthorizedAdmin(userEmail) || !isEmailVerified) {
-      console.warn(`[requireAdmin]: Unauthorized attempt by ${userEmail} (verified: ${isEmailVerified}). Authorized admins: ${ADMIN_EMAILS.join(', ')}`);
+    if ((!hasAdminClaim && !isAuthorized) || !isEmailVerified) {
+      console.warn(
+        `[requireAdmin]: Unauthorized attempt by ${userEmail} (claim: ${hasAdminClaim}, email: ${isAuthorized}, verified: ${isEmailVerified})`
+      );
       return { authenticated: false, error: 'Access denied: unauthorized account', status: 403 };
     }
 
@@ -52,6 +58,7 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
       user: {
         email: userEmail,
         uid: decodedClaims.uid,
+        admin: true,
       },
     };
   } catch (err: any) {

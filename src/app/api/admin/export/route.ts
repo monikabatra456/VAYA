@@ -5,13 +5,13 @@ import { adminDb } from '@/lib/firebase/admin';
 import { getTodayIST, formatDisplayIST } from '@/lib/utils/date';
 
 /**
- * Protect against CSV injection by escaping cells starting with dangerous characters
+ * Protect against CSV formula injection by escaping cells starting with dangerous characters
  */
 function sanitizeCsvCell(val: string | number | boolean | null | undefined): string {
   if (val === null || val === undefined) return '""';
   let str = String(val).trim();
-  // If string starts with =, +, -, @, prefix with a single quote
-  if (/^[=+\-@]/.test(str)) {
+  // If string starts with =, +, -, @, \t, \r, %, prefix with a single quote
+  if (/^[=+\-@\t\r%]/.test(str)) {
     str = `'${str}`;
   }
   // Escape internal double quotes

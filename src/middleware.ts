@@ -13,7 +13,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // Fast check for /api/admin routes (except /api/admin/session POST)
+  // Fast check for /api/admin routes (except /api/admin/session POST/DELETE)
   if (pathname.startsWith('/api/admin') && pathname !== '/api/admin/session') {
     const sessionCookie = req.cookies.get('session')?.value;
     if (!sessionCookie) {
@@ -21,7 +21,16 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Enforce no-cache on all admin responses
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+  }
+
+  return response;
 }
 
 export const config = {

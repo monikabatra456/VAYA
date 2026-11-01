@@ -1,0 +1,6 @@
+# Allow public pages to be crawled
+User-agent: *
+Disallow: /admin/
+Disallow: /admin
+Disallow: /api/
+Allow: /
