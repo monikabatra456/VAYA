@@ -179,7 +179,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     const cx = W / 2;
 
     // Measure actual header height to guarantee >= 44px clearance between subtitle and ring top
-    const headEl = section.querySelector<HTMLElement>('.ww-head');
+    const headEl = section.querySelector<HTMLElement>('.ww-subtitle') || section.querySelector<HTMLElement>('.ww-head');
     const headRect = headEl ? headEl.getBoundingClientRect() : null;
     const headSectionBottom = headRect ? headRect.bottom - rect.top : 210;
     // Ring top is cy - (globeR + 28). Required: (cy - globeR - 28) - headSectionBottom >= 44px
@@ -1178,6 +1178,12 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
         <p className="ww-subtitle">
           Pick a place. Vaya shows you what it is really like, today.
         </p>
+        {/* Mobile Hint (<= 899px): positioned directly below subtext */}
+        <div className={`ww-hint ww-hint--mobile ${hasInteracted ? "ww-hint-dimmed" : ""}`.trim()}>
+          {isRevealed
+            ? 'Hover a card to pause & focus · Tap a card to explore · Tap India pin to close'
+            : 'Drag to spin · Ctrl + scroll or +/- to zoom · Tap India pin to explore'}
+        </div>
       </header>
 
       {/* Globe Stage Area */}
@@ -1532,7 +1538,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
 
       {/* Bottom Bar: Hint & Dark Navy Glass CTA Pill */}
       <footer className="ww-bottom-bar">
-        <div className={`ww-hint ${hasInteracted ? "ww-hint-dimmed" : ""}`.trim()}>
+        <div className={`ww-hint ww-hint--desktop ${hasInteracted ? "ww-hint-dimmed" : ""}`.trim()}>
           {isRevealed
             ? 'Hover a card to pause & focus · Tap a card to explore · Tap India pin to close'
             : 'Drag to spin · Ctrl + scroll or +/- to zoom · Tap India pin to explore'}

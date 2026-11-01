@@ -726,15 +726,50 @@
   opacity: 0.35;
 }
 
-@media (max-width: 960px) {
-  .ww-hint {
-    display: inline-flex;
-    font-size: 12px;
-    padding: 6px 14px;
-    bottom: 58px;
-    max-width: 90vw;
-    white-space: normal;
+/* Hide mobile hint on desktop (>= 900px) */
+.ww-hint--mobile {
+  display: none !important;
+}
+
+/* ── Mobile / Tablet (<= 899px) & Landscape Phone Wonder World Hint ── */
+@media (max-width: 899px), (max-height: 520px) and (orientation: landscape) {
+  /* Hide desktop hint from bottom bar */
+  .ww-hint--desktop {
+    display: none !important;
+  }
+
+  /* Position mobile hint right below the subtext line, horizontally centered */
+  .ww-hint--mobile {
+    display: inline-flex !important;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    margin-inline: auto;
     text-align: center;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    white-space: normal;
+    line-height: 1.35;
+    padding: 7px 14px;
+    font-size: 12px;
+    background: rgba(18, 33, 63, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    color: #FFFFFF;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(18, 33, 63, 0.2);
+  }
+}
+
+@media (max-width: 360px) {
+  .ww-hint--mobile {
+    font-size: 11.5px;
+    padding: 6px 12px;
   }
 }
 
