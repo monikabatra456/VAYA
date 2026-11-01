@@ -707,6 +707,38 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
 
       <div ref={plateWrapRef} className="mv-plate-wrapper">
 
+        {/* Top seam blend from Page 3 into Page 4 */}
+        <div
+          className="seam-in-4"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '200px',
+            background: 'linear-gradient(to bottom, #140A04 0%, rgba(20, 10, 4, 0.6) 50%, transparent 100%)',
+            pointerEvents: 'none',
+            zIndex: 6,
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Bottom seam blend from Page 4 into Page 5 */}
+        <div
+          className="seam-4-5"
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '260px',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(247, 238, 222, 0.6) 60%, #F9F0E1 100%)',
+            pointerEvents: 'none',
+            zIndex: 6,
+          }}
+          aria-hidden="true"
+        />
+
         {/* ── WINDOW SCENE (BEHIND WINDOW FRAME) ────────────────────────────── */}
 
         <div className="mv-window-scene-viewport" aria-hidden="true">

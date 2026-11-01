@@ -79,14 +79,18 @@ export default function MeetPhoneScreen({
       style={{
         position: 'relative',
         width: '100%',
+        maxWidth: '100%',
         height: '100%',
         overflow: 'hidden',
+        overflowX: 'hidden',
         borderRadius: 'inherit',
         backgroundColor: '#000000',
         userSelect: 'none',
         display: 'flex',
         flexDirection: 'column',
         containerType: 'inline-size',
+        boxSizing: 'border-box',
+        margin: 0,
       }}
     >
       {/* ── Fixed HTML Status Bar ────────────────────────────────────────── */}
@@ -102,7 +106,12 @@ export default function MeetPhoneScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.2cqw 6.5cqw 0',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          margin: 0,
+          overflowX: 'hidden',
+          padding: '1.2cqw 4cqw 0',
           backgroundColor: 'transparent',
           color: '#0f172a',
           pointerEvents: 'none',
@@ -161,7 +170,7 @@ export default function MeetPhoneScreen({
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'top center',
+            objectPosition: 'left top',
             display: 'block',
           }}
         />
@@ -196,7 +205,7 @@ export default function MeetPhoneScreen({
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'top center',
+            objectPosition: 'left top',
             display: 'block',
           }}
         />
@@ -226,7 +235,12 @@ export default function MeetPhoneScreen({
         {/* Inner App Content */}
         <div
           style={{
-            padding: '2.5cqw 3.5cqw',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            margin: 0,
+            overflowX: 'hidden',
+            padding: '2.5cqw 4cqw',
             display: 'flex',
             flexDirection: 'column',
             gap: '2.5cqw',

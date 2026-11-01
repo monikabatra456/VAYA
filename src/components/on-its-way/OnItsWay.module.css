@@ -3,7 +3,7 @@
 .container {
   --navy: #14264A;
   --gold: #C98A3A;
-  --cream: #FBF1E3;
+  --cream: #F9F0E1;
   --slate: #6B7280;
   --taupe: #BBA89E;
 
@@ -15,6 +15,7 @@
   overflow: hidden;
   isolation: isolate;
   background-color: var(--cream);
+  margin-top: -1px;
   color: var(--navy);
   font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
