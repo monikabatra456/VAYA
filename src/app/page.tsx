@@ -37,7 +37,7 @@ export default function Home() {
       <OnItsWay />
 
       {/* Footer */}
-      <Footer />
+      <Footer onWaitlist={() => setShowWaitlist(true)} />
 
       {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </main>

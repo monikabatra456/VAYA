@@ -1,0 +1,382 @@
+/* src/components/footer.module.css */
+.footer {
+  position: relative;
+  width: 100%;
+  background-color: #FBF1E3;
+  color: #14264A;
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  padding: 96px 24px 40px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-top: 1px solid #E3D3BC;
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP CTA BAND */
+.ctaBand {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 72px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #C98A3A;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.ctaHeading {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #14264A;
+  margin: 0 0 12px;
+}
+
+.goldWord {
+  color: #C98A3A;
+}
+
+.subLine {
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  color: #4B5563;
+  font-weight: 500;
+  margin: 0 0 28px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.waitlistBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  background-color: #14264A;
+  color: #FFFFFF;
+  border: 1px solid #14264A;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(20, 38, 74, 0.2);
+}
+
+.waitlistBtn:hover {
+  transform: translateY(-2px);
+  background-color: #1c3360;
+  box-shadow: 0 6px 20px rgba(20, 38, 74, 0.3);
+}
+
+.whatsappBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background-color: transparent;
+  color: #14264A;
+  border: 1.5px solid #14264A;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.whatsappBtn:hover {
+  transform: translateY(-2px);
+  border-color: #C98A3A;
+  color: #9A6420;
+  background-color: rgba(201, 138, 58, 0.06);
+}
+
+/* MAIN GRID (3 columns) */
+.mainGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  margin-bottom: 64px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+}
+
+/* Col 1: Brand */
+.brandCol {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .brandCol {
+    align-items: center;
+  }
+}
+
+.brandLogo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.brandTagline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #9A6420;
+  margin-top: 10px;
+}
+
+.brandDesc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4B5563;
+  margin-top: 14px;
+  max-width: 340px;
+}
+
+/* Col 2: Connect with us */
+.connectCol {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .connectCol {
+    align-items: center;
+  }
+}
+
+.colTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #14264A;
+  margin: 0 0 20px;
+}
+
+.socialList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #14264A;
+  group: true;
+}
+
+.socialCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid #E3D3BC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #14264A;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.socialRow:hover .socialCircle {
+  border-color: #C98A3A;
+  color: #C98A3A;
+}
+
+.socialLabel {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  text-align: left;
+}
+
+.socialArrow {
+  font-size: 14px;
+  color: #C98A3A;
+  transition: transform 0.2s ease;
+}
+
+.socialRow:hover .socialArrow {
+  transform: translateX(4px);
+}
+
+/* Col 3: The Founders */
+.foundersCol {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .foundersCol {
+    align-items: center;
+  }
+}
+
+.founderCards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.founderCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #E3D3BC;
+  border-radius: 12px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #14264A;
+  color: #FBF1E3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.founderInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.founderName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #14264A;
+}
+
+.founderRole {
+  font-size: 12px;
+  font-weight: 500;
+  color: #9A6420;
+  margin-top: 1px;
+}
+
+.founderEmail {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #4B5563;
+  margin-top: 3px;
+  text-decoration: none;
+}
+
+.founderEmailLink:hover {
+  color: #14264A;
+  text-decoration: underline;
+}
+
+/* BOTTOM BAR */
+.bottomBar {
+  padding-top: 28px;
+  border-top: 1px solid #E3D3BC;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  color: #4B5563;
+}
+
+.heartSvg {
+  display: inline-block;
+  vertical-align: middle;
+  color: #C98A3A;
+  margin: 0 4px;
+}
+
+.adminLink {
+  color: #14264A;
+  opacity: 0.25;
+  text-decoration: none;
+  font-size: 12px;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.adminLink:hover {
+  opacity: 0.8;
+}
+
+/* Big faded VAYA wordmark background decor */
+.fadedWordmark {
+  position: absolute;
+  bottom: -2vw;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 20vw;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #14264A;
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 0.8;
+  z-index: 1;
+}
+
+.footer :focus-visible {
+  outline: 2px solid #C98A3A;
+  outline-offset: 3px;
+}
