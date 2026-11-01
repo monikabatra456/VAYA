@@ -96,8 +96,8 @@ export default function Footer({ onWaitlist }: FooterProps) {
             <Image
               src={siteConfig.logo}
               alt="VAYA"
-              width={120}
-              height={38}
+              width={72}
+              height={26}
               className={styles.brandLogo}
               priority={false}
             />

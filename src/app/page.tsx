@@ -6,7 +6,7 @@ import Hero from '@/components/Hero';
 import WaitlistModal from '@/components/WaitlistModal';
 import Section2 from '@/components/section2/Section2';
 import WonderWorld from '@/components/wonder/WonderWorld';
-import MeetVaya from '@/components/MeetVaya2';
+import MeetVaya from '@/components/MeetVaya';
 import ScrollManager from '@/components/ScrollManager';
 import OnItsWay from '@/components/on-its-way/OnItsWay';
 import Footer from '@/components/Footer';
