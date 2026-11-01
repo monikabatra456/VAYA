@@ -8,7 +8,8 @@
   padding: 96px 24px 40px 140px;
   box-sizing: border-box;
   overflow: hidden;
-  border-top: 1px solid #E3D3BC;
+  border-top: none;
+  margin-top: -1px;
 }
 
 @media (max-width: 900px) {

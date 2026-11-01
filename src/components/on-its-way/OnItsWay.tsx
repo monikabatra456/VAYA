@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Playfair_Display, Kaushan_Script, Plus_Jakarta_Sans } from 'next/font/google';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './OnItsWay.module.css';
 import {
   VIEWBOX,
@@ -42,6 +43,7 @@ interface OnItsWayProps {
 
 export default function OnItsWay({ navbarRef }: OnItsWayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentStageRef = useRef<HTMLDivElement>(null);
 
   // Background and scenery refs
   const bgRef = useRef<HTMLDivElement>(null);
@@ -96,10 +98,18 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
 
       if (isCancelled || !containerRef.current) return;
 
+      // Refresh ScrollTrigger after dimensions are set
+      if (typeof window !== 'undefined') {
+        requestAnimationFrame(() => {
+          gsap.registerPlugin(ScrollTrigger);
+          ScrollTrigger.refresh();
+        });
+      }
+
       timelineCtx = gsap.context(() => {
         createOnItsWayTimeline(
           {
-            container: containerRef.current,
+            container: contentStageRef.current,
             svg: svgRef.current,
             bg: bgRef.current,
             navbar: navbarRef?.current || null,
@@ -164,6 +174,8 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
         </picture>
       </div>
 
+      {/* Content stage shifted 120px down to restore exact original coordinates */}
+      <div ref={contentStageRef} className={styles.contentStage}>
       {/* Clouds Front Layer: Slow horizontal drift */}
       <div ref={cloudsRef} className={styles.cloudsFrontLayer} aria-hidden="true">
         <Image
@@ -346,8 +358,10 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
           <span className={styles.goldDividerLine} />
         </div>
       </div>
+      </div>
 
-      
+      {/* SEAM C: Blend from Page 5 clouds into Footer cream */}
+      <div className={styles.seamBottom} aria-hidden="true" />
     </section>
   );
 }
