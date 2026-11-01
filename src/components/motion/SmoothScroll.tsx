@@ -50,8 +50,8 @@ export default function SmoothScroll() {
         });
       }
 
-      if (typeof document !== 'undefined' && document.fonts?.ready) {
-        document.fonts.ready.then(() => {
+      if (typeof window !== 'undefined') {
+        window.addEventListener('load', () => {
           ScrollTrigger.refresh();
         });
       }
