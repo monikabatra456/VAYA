@@ -83,6 +83,12 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
     let isCancelled = false;
     let timelineCtx: gsap.Context | null = null;
 
+    const handleOrientation = () => {
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener('orientationchange', handleOrientation);
+    window.addEventListener('resize', handleOrientation);
+
     const init = async () => {
       // Await plane image decode (img.decode()) and document.fonts.ready
       const img = new window.Image();
@@ -144,6 +150,8 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
 
     return () => {
       isCancelled = true;
+      window.removeEventListener('orientationchange', handleOrientation);
+      window.removeEventListener('resize', handleOrientation);
       if (timelineCtx) timelineCtx.revert();
     };
   }, [navbarRef]);

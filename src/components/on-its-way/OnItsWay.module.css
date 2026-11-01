@@ -467,3 +467,21 @@
 
 
 
+
+@media (max-width: 1023px) {
+  .container {
+    height: calc(100svh + 90px) !important;
+    min-height: calc(100svh + 90px) !important;
+    margin-top: -90px !important;
+    z-index: 5;
+  }
+
+  .contentStage {
+    top: 90px !important;
+    height: 100svh !important;
+  }
+
+  .seamBottom {
+    height: 110px !important;
+  }
+}

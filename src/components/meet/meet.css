@@ -1489,3 +1489,20 @@
 
 
 
+
+/* ── Mobile/Tablet (<=1023px) Seam B & Background Fixes ── */
+@media (max-width: 1023px) {
+  .mv-section {
+    background: transparent !important;
+    background-color: transparent !important;
+    margin-top: -80px !important;
+    z-index: 10 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .mv-plate-wrapper {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
+    mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 90px), transparent 100%) !important;
+  }
+}
