@@ -9,7 +9,7 @@ A production-ready private administration dashboard and serverless backend for V
 - **Public Client (`/`)**: Existing landing page visuals, GSAP animations, Three.js earth, and styling are 100% preserved. Includes a non-blocking tracking provider (`/api/track`) and a subtle "Admin" footer link.
 - **Serverless Backend (`/api/*`)**: Runs on Node.js runtime (`export const runtime = "nodejs"`). Enforces cryptographic session verification via `firebase-admin`, honeypot bot filtering, and in-memory rate limiting.
 - **Private Admin (`/admin`)**:
-  - `/admin/login`: Google OAuth Popup via Firebase Client SDK. Restricted exclusively to `chotimonino1@gmail.com`.
+  - `/admin/login`: Google OAuth Popup via Firebase Client SDK. Restricted exclusively to `go.vayaus@gmail.com`.
   - `/admin`: High-level analytics overview, 4 KPI cards with % delta vs previous period, Traffic & Growth line charts (Daily/Weekly/Monthly), New vs Returning activity, and live recent submissions.
   - `/admin/waitlist`: Comprehensive table with live updates via Firestore `onSnapshot`, debounced prefix search, status/date filters, cursor pagination, slide-over detail drawer, and Excel-safe UTF-8 BOM CSV streaming export.
 
@@ -50,7 +50,7 @@ FIREBASE_CLIENT_EMAIL=your-service-account@vaya-57d51.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFA...\n-----END PRIVATE KEY-----\n"
 
 # Admin Access Control
-ADMIN_EMAIL=chotimonino1@gmail.com
+ADMIN_EMAIL=go.vayaus@gmail.com
 
 # Tracking & Security Salt
 VISITOR_HASH_SALT=your-random-salt-string
@@ -71,7 +71,7 @@ firebase deploy --only firestore
 
 The security rules enforce:
 - Direct client access is denied for all visitor tracking collections.
-- Only the verified administrator (`chotimonino1@gmail.com`) is granted direct client read permissions on `waitlist_submissions` for real-time listeners.
+- Only the verified administrator (`go.vayaus@gmail.com`) is granted direct client read permissions on `waitlist_submissions` for real-time listeners.
 - All database mutations are strictly performed via server-side Admin SDK.
 
 ### Step 6: Seed Test Data (Optional)

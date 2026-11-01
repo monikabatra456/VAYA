@@ -38,6 +38,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   const [tapTooltip, setTapTooltip] = useState<{ x: number; y: number; text: string; id: number } | null>(null);
   const [hoveredDestId, setHoveredDestId] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [hoveredWmIdx, setHoveredWmIdx] = useState<number | null>(null);
 
   // Refs for animation loop
@@ -478,6 +479,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
     }
 
     rot.current.isDragging = true;
+    setHasInteracted(true);
     rot.current.dragStartX = e.clientX;
     rot.current.dragStartY = e.clientY;
     rot.current.lastX = e.clientX;
@@ -560,6 +562,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
 
   // Button Zoom Handlers (+ / − / X)
   const handleZoomIn = () => {
+    setHasInteracted(true);
     setZoomLevel((prev) => {
       const next = Math.min(2.2, Number((prev + 0.3).toFixed(1)));
       targetCamZ.current = 3.3 / next;
@@ -568,6 +571,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
   };
 
   const handleZoomOut = () => {
+    setHasInteracted(true);
     setZoomLevel((prev) => {
       const next = Math.max(1.0, Number((prev - 0.3).toFixed(1)));
       targetCamZ.current = 3.3 / next;
@@ -1528,7 +1532,7 @@ export default function WonderWorld({ onWaitlist }: WonderWorldProps) {
 
       {/* Bottom Bar: Hint & Dark Navy Glass CTA Pill */}
       <footer className="ww-bottom-bar">
-        <div className="ww-hint">
+        <div className={`ww-hint ${hasInteracted ? "ww-hint-dimmed" : ""}`.trim()}>
           {isRevealed
             ? 'Hover a card to pause & focus · Tap a card to explore · Tap India pin to close'
             : 'Drag to spin · Ctrl + scroll or +/- to zoom · Tap India pin to explore'}

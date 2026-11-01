@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 
-const rawAdminEmails = (process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || 'chotimonino1@gmail.com');
+const rawAdminEmails = (process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || 'go.vayaus@gmail.com');
 export const ADMIN_EMAILS = rawAdminEmails
   .split(',')
   .map((e) => e.toLowerCase().trim())
   .filter(Boolean);
-export const ADMIN_EMAIL = ADMIN_EMAILS[0] || 'chotimonino1@gmail.com';
+export const ADMIN_EMAIL = ADMIN_EMAILS[0] || 'go.vayaus@gmail.com';
 
 export function isAuthorizedAdmin(email?: string | null): boolean {
   if (!email) return false;

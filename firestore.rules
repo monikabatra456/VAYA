@@ -11,7 +11,8 @@ service cloud.firestore {
     // All writes happen strictly through server-side Admin SDK
     match /waitlist_submissions/{submissionId} {
       allow read: if request.auth != null &&
-                     request.auth.token.email.lower() == "chotimonino1@gmail.com" &&
+                     (request.auth.token.email.lower() == "go.vayaus@gmail.com" ||
+                      request.auth.token.email.lower() == "chotimonino1@gmail.com") &&
                      request.auth.token.email_verified == true;
       allow write: if false;
     }
