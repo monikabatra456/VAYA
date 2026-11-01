@@ -133,9 +133,6 @@ export default function Nav({ onWaitlist }: NavProps) {
     if (prevOnHome.current === onHome) return;
     prevOnHome.current = onHome;
 
-    if (prevOnHome.current === onHome) return;
-    prevOnHome.current = onHome;
-
     if (isReduced) {
       if (onHome) links.forEach((el) => hs.appendChild(el));
       else        links.forEach((el) => rs.appendChild(el));
@@ -194,6 +191,7 @@ export default function Nav({ onWaitlist }: NavProps) {
 
   const activeIdx = Math.max(0, NAV_PAGES.findIndex((p) => p.id === activeId));
   const progressPct = (activeIdx / (NAV_PAGES.length - 1)) * 100;
+  const isDark = activeId === "meet-vaya";
 
   return (
     <>
@@ -306,7 +304,7 @@ export default function Nav({ onWaitlist }: NavProps) {
                 bottom: "4px",
                 left: "3.5px",
                 width: "1px",
-                background: "rgba(20,33,61,0.15)",
+                background: isDark ? "rgba(255,255,255,0.25)" : "rgba(20,33,61,0.15)",
                 zIndex: 0,
               }}
             >
@@ -318,7 +316,7 @@ export default function Nav({ onWaitlist }: NavProps) {
                   left: 0,
                   width: "1px",
                   height: `${progressPct}%`,
-                  background: COPPER,
+                  background: isDark ? "#f2b84b" : COPPER,
                   transition: isReduced ? "none" : "height 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
                 }}
               />
@@ -328,6 +326,7 @@ export default function Nav({ onWaitlist }: NavProps) {
             <div
               ref={railSlot}
               className="nav-rail-slot"
+              data-theme={isDark ? "dark" : "light"}
             />
           </div>
         </aside>,
