@@ -54,8 +54,12 @@ export async function GET(req: Request) {
         .where('emailLower', '>=', searchLower)
         .where('emailLower', '<=', searchLower + '\uf8ff');
     } else {
-      // Default order: newest first
-      query = query.orderBy('createdAt', 'desc');
+      // When filtering by createdDay, order by createdDay to satisfy Firestore single-field indexing requirements
+      if (from || to) {
+        query = query.orderBy('createdDay', 'desc');
+      } else {
+        query = query.orderBy('createdAt', 'desc');
+      }
     }
 
     // Cursor pagination
@@ -86,6 +90,9 @@ export async function GET(req: Request) {
         createdAtIso: createdAtDate.toISOString(),
       });
     });
+
+    // Ensure items are sorted newest first by creation timestamp
+    items.sort((a, b) => new Date(b.createdAtIso).getTime() - new Date(a.createdAtIso).getTime());
 
     const nextCursor = items.length === limit ? items[items.length - 1].id : null;
 

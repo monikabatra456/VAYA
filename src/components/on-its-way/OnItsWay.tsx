@@ -347,21 +347,7 @@ export default function OnItsWay({ navbarRef }: OnItsWayProps) {
         </div>
       </div>
 
-      {/* SEAM B: Blend from Page 4 dark cabin into Page 5 */}
-      <div
-        className={styles.seamTop}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '300px',
-          pointerEvents: 'none',
-          zIndex: 30,
-          background: 'linear-gradient(to bottom, #140A04 0%, rgba(20, 10, 4, 0.55) 35%, transparent 100%)',
-        }}
-        aria-hidden="true"
-      />
+      
     </section>
   );
 }

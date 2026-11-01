@@ -10,6 +10,7 @@ import {
   getMonthKeyIST,
   parseISTStartOfDay,
   parseISTEndOfDay,
+  formatDisplayIST,
 } from '@/lib/utils/date';
 
 // 60-Second In-Memory Cache for Analytics queries
@@ -231,13 +232,41 @@ export async function GET(req: Request) {
       };
     });
 
+    // Fetch recent 5 waitlist submissions using server-side adminDb
+    let recentSignups: any[] = [];
+    try {
+      const recentSnapshot = await adminDb
+        .collection('waitlist_submissions')
+        .orderBy('createdAt', 'desc')
+        .limit(5)
+        .get();
+
+      recentSignups = recentSnapshot.docs.map((doc) => {
+        const d = doc.data();
+        const date = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
+        return {
+          id: doc.id,
+          email: d.email,
+          role: d.role || 'traveller',
+          biggestProblem: d.biggestProblem || d.problem || '—',
+          consent: Boolean(d.consent),
+          status: d.status || 'new',
+          submittedOn: formatDisplayIST(date),
+        };
+      });
+    } catch (e) {
+      console.warn('[Analytics] Failed to fetch recent waitlist signups:', e);
+    }
+
+    const effectiveSignups = Math.max(totalSignups, waitlistSnapshot.size);
+
     const responseData = {
       ok: true,
       range: { from, to, granularity },
       kpis: {
         totalVisitors: { value: totalVisitors, delta: visitorsDelta },
         totalPageViews: { value: totalPageViews, delta: pageViewsDelta },
-        waitlistSignups: { value: totalSignups, delta: signupsDelta },
+        waitlistSignups: { value: effectiveSignups, delta: signupsDelta },
         visitorsNotJoined: {
           value: visitorsNotJoined,
           percent: visitorsNotJoinedPercent,
@@ -256,6 +285,7 @@ export async function GET(req: Request) {
         localGuide: localGuideCount,
         total: travellerCount + localGuideCount,
       },
+      recentSignups,
     };
 
     // Store in cache

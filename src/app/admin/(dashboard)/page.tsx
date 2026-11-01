@@ -87,6 +87,9 @@ export default function AdminOverviewPage() {
         setTimeSeries(data.timeSeries || []);
         setTopProblems(data.topProblems || []);
         setRoleSplit(data.roleSplit || null);
+        if (data.recentSignups && Array.isArray(data.recentSignups)) {
+          setRecentSignups(data.recentSignups);
+        }
       }
     } catch (err) {
       console.error('Failed to load analytics:', err);

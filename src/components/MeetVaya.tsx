@@ -1032,21 +1032,7 @@ export default function MeetVaya({ onWaitlist }: MeetVayaProps) {
 
       </div>
 
-      {/* SEAM A: Blend from Page 3 into Page 4 */}
-      <div
-        className="seam-top"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '240px',
-          pointerEvents: 'none',
-          zIndex: 30,
-          background: 'linear-gradient(to bottom, #2A1A0E 0%, rgba(42, 26, 14, 0.6) 40%, transparent 100%)',
-        }}
-        aria-hidden="true"
-      />
+      
     </section>
 
   );

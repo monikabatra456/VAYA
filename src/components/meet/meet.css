@@ -9,9 +9,10 @@
   height: 100vh;
   height: 100svh;
   overflow: hidden;
-  background: #1a110a;
+  background: linear-gradient(to bottom, #1a110a 0%, #1a110a calc(100% - 120px), transparent 100%);
   user-select: none;
-  margin-top: -1px;
+  margin-top: -110px;
+  z-index: 10;
 }
 
 
@@ -25,14 +26,12 @@
 /* ── PLATE WRAPPER: object-fit cover for 1672x941 image ─────────────── */
 
 .mv-plate-wrapper {
-
   position: absolute;
-
   top: 50%;
-
   left: 50%;
-
   transform: translate(-50%, -50%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 120px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 120px), transparent 100%);
 
   width: max(100vw, calc(100vh * 1672 / 941));
 
@@ -1482,14 +1481,4 @@
 }
 
 
-/* Seam A: Blend from Page 3 into Page 4 */
-.seam-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 240px;
-  pointer-events: none;
-  z-index: 30;
-  background: linear-gradient(to bottom, #2A1A0E 0%, rgba(42, 26, 14, 0.6) 40%, transparent 100%);
-}
+

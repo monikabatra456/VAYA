@@ -12,13 +12,14 @@
 /* ── Section Container: Pale cream -> soft golden haze sky (IMG-REF spec) ── */
 .ww-section {
   position: relative;
+  z-index: 20;
   min-height: 100vh;
   min-height: 100svh;
   min-height: max(100vh, 800px);
   width: 100%;
   background:
     radial-gradient(ellipse 70% 50% at 50% 80%, rgba(255, 230, 180, 0.45), transparent 75%),
-    linear-gradient(180deg, #F6F1E7 0%, #faf0dc 35%, #f7e6ca 65%, #f4d8b0 100%);
+    linear-gradient(180deg, #F6F1E7 0%, #faf0dc 35%, #f7e6ca 65%, #f4d8b0 calc(100% - 110px), transparent 100%);
   overflow: hidden;
   user-select: none;
   display: flex;
@@ -100,6 +101,8 @@
   z-index: 2;
   display: block;
   filter: contrast(0.98) brightness(1.06) saturate(1.05);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 110px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 110px), transparent 100%);
 }
 
 @media (min-aspect-ratio: 1865/1000) {
