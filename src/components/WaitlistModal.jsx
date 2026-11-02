@@ -34,6 +34,7 @@ export default function WaitlistModal({ onClose }) {
   const modalRef = useRef(null);
   const emailInputRef = useRef(null);
   const dropdownRef = useRef(null);
+  const isSubmittingRef = useRef(false);
 
   const isEmailValid = Boolean(form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()));
   const isFormComplete = Boolean(isEmailValid && form.role && form.biggestProblem && form.consent);
@@ -148,12 +149,15 @@ export default function WaitlistModal({ onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (status === 'submitting' || isSubmittingRef.current) return;
+
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
       return;
     }
 
+    isSubmittingRef.current = true;
     setStatus('submitting');
     setServerMessage('');
 
@@ -176,7 +180,7 @@ export default function WaitlistModal({ onClose }) {
       if (res.ok) {
         if (data.alreadyJoined) {
           setStatus('duplicate');
-          setServerMessage(data.message || "You're already on the waitlist! Welcome back.");
+          setServerMessage(data.message || "You're already on the VAYA waitlist, we'll email you soon");
         } else {
           setStatus('success');
         }
@@ -187,6 +191,8 @@ export default function WaitlistModal({ onClose }) {
     } catch {
       setStatus('error');
       setServerMessage('Unable to connect. Please check your network and try again.');
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 
@@ -312,7 +318,7 @@ export default function WaitlistModal({ onClose }) {
             </div>
             <h2 className="wl-success-title">Already on the list!</h2>
             <p className="wl-success-desc">
-              {serverMessage || "You're already on the waitlist! We will notify you as soon as invitations roll out."}
+              {serverMessage || "You're already on the VAYA waitlist, we'll email you soon"}
             </p>
             <button type="button" onClick={onClose} className="wl-action-btn">
               Done

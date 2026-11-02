@@ -15,32 +15,19 @@ service cloud.firestore {
       );
     }
 
-    function isValidEmail(email) {
-      return email is string &&
-             email.size() >= 3 &&
-             email.size() <= 254 &&
-             email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    // Waitlist Submissions:
+    // - Public clients cannot directly write to this collection.
+    // - All submissions MUST go through the server-side Next.js API (/api/waitlist) via Admin SDK.
+    // - Read, Update, Delete are restricted strictly to verified Admins.
+    match /waitlist_submissions/{submissionId} {
+      allow create: if false;
+      allow read, update, delete: if isAdmin();
     }
 
-    // Waitlist Submissions:
-    // - Public clients can only CREATE with strict validation
-    // - Read, Update, Delete are restricted strictly to verified Admins
-    match /waitlist_submissions/{submissionId} {
-      allow create: if isValidEmail(request.resource.data.email) &&
-                       isValidEmail(request.resource.data.emailLower) &&
-                       request.resource.data.role in ['traveller', 'local_guide'] &&
-                       request.resource.data.biggestProblem is string &&
-                       request.resource.data.biggestProblem.size() <= 200 &&
-                       request.resource.data.consent == true &&
-                       request.resource.data.status in ['new', 'reviewed'] &&
-                       request.resource.data.createdAt == request.time &&
-                       request.resource.data.keys().hasOnly([
-                         'email', 'emailLower', 'role', 'biggestProblem',
-                         'consent', 'status', 'source', 'visitorId',
-                         'createdDay', 'createdAt'
-                       ]);
-
-      allow read, update, delete: if isAdmin();
+    // Waitlist Email Keys (uniqueness lock collection):
+    // Managed exclusively by server Admin SDK. Denied by default.
+    match /waitlist_email_keys/{keyHash} {
+      allow read, write: if false;
     }
 
     // Visitors, Visitor Days & Daily Analytics:

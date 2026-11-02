@@ -6,9 +6,14 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { adminDb, adminFirestore } from '@/lib/firebase/admin';
 import { getTodayIST } from '@/lib/utils/date';
+import { canonicalEmail } from '@/lib/utils/email';
 import { VALID_PROBLEMS } from '@/lib/constants/waitlist';
 
 // ── In-Memory Rate Limiter (Max 5 requests per 10 minutes per IP) ────────────
+// Note for serverless (Vercel): in-memory Map provides immediate zero-overhead protection
+// per container instance without adding Firestore read/write latency on every request.
+// TODO: If multi-region or distributed abuse occurs across cold instances,
+// migrate to a distributed Redis (Upstash) or Firestore rate_limits collection with TTL.
 const RATE_LIMIT_WINDOW = 10 * 60 * 1000;
 const MAX_REQUESTS = 5;
 const ipRateMap = new Map<string, { count: number; expiresAt: number }>();
@@ -37,7 +42,6 @@ const WaitlistSchema = z.object({
   email: z
     .string()
     .trim()
-    .toLowerCase()
     .email('Please enter a valid email address')
     .max(254, 'Email is too long'),
   role: z.enum(['traveller', 'local_guide']).default('traveller'),
@@ -119,17 +123,22 @@ export async function POST(req: Request) {
 
     const emailTrimmed = data.email;
     const emailLower = emailTrimmed.toLowerCase();
+    const emailKey = canonicalEmail(emailTrimmed);
 
-    // Deterministic doc ID from sha256 of lowercase trimmed email (prevents duplicate documents)
+    // Deterministic doc ID from sha256 of lowercase trimmed email (keeps backward compatibility)
     const docId = crypto.createHash('sha256').update(emailLower).digest('hex');
+
+    // Lock doc ID from sha256 of canonical email key
+    const lockDocId = crypto.createHash('sha256').update(emailKey).digest('hex');
 
     const cookieStore = cookies();
     const visitorId = cookieStore.get('vaya_vid')?.value || null;
     const todayIST = getTodayIST();
 
     const submissionData = {
-      email: emailTrimmed,
+      email: emailTrimmed, // Keep original typed email for display
       emailLower,
+      emailKey, // Canonical value for strict deduplication
       role: data.role,
       biggestProblem: data.biggestProblem,
       consent: true,
@@ -145,39 +154,75 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, message: 'Successfully joined the waitlist!' });
     }
 
+    const lockRef = adminDb.collection('waitlist_email_keys').doc(lockDocId);
     const submissionRef = adminDb.collection('waitlist_submissions').doc(docId);
+    const visitorRef = visitorId ? adminDb.collection('visitors').doc(visitorId) : null;
+    const dailyRef = adminDb.collection('analytics_daily').doc(todayIST);
 
-    // 5. Duplicate Check
-    const existingDoc = await submissionRef.get();
-    if (existingDoc.exists) {
+    let alreadyJoined = false;
+
+    // 5. Transactional Uniqueness with Lock Collection
+    await adminDb.runTransaction(async (transaction) => {
+      // ── READ PHASE (All reads must precede all writes) ──
+      const lockDoc = await transaction.get(lockRef);
+      if (lockDoc.exists) {
+        alreadyJoined = true;
+        return;
+      }
+
+      // Check submission doc by emailLower (handles existing legacy docs prior to lock collection)
+      const existingSubmission = await transaction.get(submissionRef);
+      if (existingSubmission.exists) {
+        alreadyJoined = true;
+        // Backfill the lock doc atomically
+        transaction.set(lockRef, {
+          emailKey,
+          submissionId: docId,
+          createdAt: adminFirestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        return;
+      }
+
+      let visitorDocExists = false;
+      if (visitorRef) {
+        const vDoc = await transaction.get(visitorRef);
+        visitorDocExists = vDoc.exists;
+      }
+
+      // ── WRITE PHASE (Atomic writes) ──
+      // 1. Create lock document
+      transaction.set(lockRef, {
+        emailKey,
+        submissionId: docId,
+        createdAt: adminFirestore.FieldValue.serverTimestamp(),
+      });
+
+      // 2. Create waitlist submission document
+      transaction.set(submissionRef, {
+        ...submissionData,
+        createdAt: adminFirestore.FieldValue.serverTimestamp(),
+      });
+
+      // 3. Mark visitor as joined
+      if (visitorRef && visitorDocExists) {
+        transaction.update(visitorRef, { hasJoined: true });
+      }
+
+      // 4. Increment daily analytics signups
+      transaction.set(
+        dailyRef,
+        { signups: adminFirestore.FieldValue.increment(1) },
+        { merge: true }
+      );
+    });
+
+    if (alreadyJoined) {
       return NextResponse.json({
         ok: true,
         alreadyJoined: true,
-        message: "You're already on the waitlist! Welcome back.",
+        message: "You're already on the VAYA waitlist, we'll email you soon",
       });
     }
-
-    // 6. Atomic Batch Write
-    const batch = adminDb.batch();
-
-    batch.set(submissionRef, {
-      ...submissionData,
-      createdAt: adminFirestore.FieldValue.serverTimestamp(),
-    });
-
-    if (visitorId) {
-      const visitorRef = adminDb.collection('visitors').doc(visitorId);
-      batch.set(visitorRef, { hasJoined: true }, { merge: true });
-    }
-
-    const dailyRef = adminDb.collection('analytics_daily').doc(todayIST);
-    batch.set(
-      dailyRef,
-      { signups: adminFirestore.FieldValue.increment(1) },
-      { merge: true }
-    );
-
-    await batch.commit();
 
     return NextResponse.json({ ok: true, message: 'Successfully joined the waitlist!' });
   } catch (err: any) {
