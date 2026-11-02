@@ -30,9 +30,9 @@ import { useAdminContext } from '@/components/admin/AdminLayoutClient';
 import { formatDisplayIST } from '@/lib/utils/date';
 
 interface KpiData {
-  totalVisitors: { value: number; delta: number };
-  totalPageViews: { value: number; delta: number };
-  waitlistSignups: { value: number; delta: number };
+  totalVisitors: { value: number; delta: number | null };
+  totalPageViews: { value: number; delta: number | null };
+  waitlistSignups: { value: number; delta: number | null };
   visitorsNotJoined: { value: number; percent: number };
 }
 
@@ -161,16 +161,22 @@ export default function AdminOverviewPage() {
             {loading ? '—' : kpis?.totalVisitors.value.toLocaleString() ?? 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
-            {kpis && kpis.totalVisitors.delta >= 0 ? (
-              <span className="flex items-center text-[#167A3E] font-semibold">
-                <TrendingUp size={13} className="mr-0.5" /> +{kpis.totalVisitors.delta}%
-              </span>
+            {kpis && kpis.totalVisitors.delta !== null ? (
+              <>
+                {kpis.totalVisitors.delta >= 0 ? (
+                  <span className="flex items-center text-[#167A3E] font-semibold">
+                    <TrendingUp size={13} className="mr-0.5" /> +{kpis.totalVisitors.delta}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-[#B42318] font-semibold">
+                    <TrendingDown size={13} className="mr-0.5" /> {kpis.totalVisitors.delta}%
+                  </span>
+                )}
+                <span className="text-[#5B6577] font-medium">vs previous period</span>
+              </>
             ) : (
-              <span className="flex items-center text-[#B42318] font-semibold">
-                <TrendingDown size={13} className="mr-0.5" /> {kpis?.totalVisitors.delta}%
-              </span>
+              <span className="text-[#5B6577] font-medium">No previous data</span>
             )}
-            <span className="text-[#5B6577] font-medium">vs previous period</span>
           </div>
         </div>
 
@@ -188,16 +194,22 @@ export default function AdminOverviewPage() {
             {loading ? '—' : kpis?.totalPageViews.value.toLocaleString() ?? 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
-            {kpis && kpis.totalPageViews.delta >= 0 ? (
-              <span className="flex items-center text-[#167A3E] font-semibold">
-                <TrendingUp size={13} className="mr-0.5" /> +{kpis.totalPageViews.delta}%
-              </span>
+            {kpis && kpis.totalPageViews.delta !== null ? (
+              <>
+                {kpis.totalPageViews.delta >= 0 ? (
+                  <span className="flex items-center text-[#167A3E] font-semibold">
+                    <TrendingUp size={13} className="mr-0.5" /> +{kpis.totalPageViews.delta}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-[#B42318] font-semibold">
+                    <TrendingDown size={13} className="mr-0.5" /> {kpis.totalPageViews.delta}%
+                  </span>
+                )}
+                <span className="text-[#5B6577] font-medium">vs previous period</span>
+              </>
             ) : (
-              <span className="flex items-center text-[#B42318] font-semibold">
-                <TrendingDown size={13} className="mr-0.5" /> {kpis?.totalPageViews.delta}%
-              </span>
+              <span className="text-[#5B6577] font-medium">No previous data</span>
             )}
-            <span className="text-[#5B6577] font-medium">vs previous period</span>
           </div>
         </div>
 
@@ -215,16 +227,22 @@ export default function AdminOverviewPage() {
             {loading ? '—' : kpis?.waitlistSignups.value.toLocaleString() ?? 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
-            {kpis && kpis.waitlistSignups.delta >= 0 ? (
-              <span className="flex items-center text-[#167A3E] font-semibold">
-                <TrendingUp size={13} className="mr-0.5" /> +{kpis.waitlistSignups.delta}%
-              </span>
+            {kpis && kpis.waitlistSignups.delta !== null ? (
+              <>
+                {kpis.waitlistSignups.delta >= 0 ? (
+                  <span className="flex items-center text-[#167A3E] font-semibold">
+                    <TrendingUp size={13} className="mr-0.5" /> +{kpis.waitlistSignups.delta}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-[#B42318] font-semibold">
+                    <TrendingDown size={13} className="mr-0.5" /> {kpis.waitlistSignups.delta}%
+                  </span>
+                )}
+                <span className="text-[#5B6577] font-medium">vs previous period</span>
+              </>
             ) : (
-              <span className="flex items-center text-[#B42318] font-semibold">
-                <TrendingDown size={13} className="mr-0.5" /> {kpis?.waitlistSignups.delta}%
-              </span>
+              <span className="text-[#5B6577] font-medium">No previous data</span>
             )}
-            <span className="text-[#5B6577] font-medium">vs previous period</span>
           </div>
         </div>
 

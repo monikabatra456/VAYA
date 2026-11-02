@@ -121,6 +121,15 @@ export async function POST(req: Request) {
       path: '/',
     });
 
+    // Set 1-year vaya_internal cookie so admin's visits are excluded from analytics
+    cookieStore.set('vaya_internal', '1', {
+      maxAge: 365 * 24 * 60 * 60,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     recordFailedLogin(rateKey);

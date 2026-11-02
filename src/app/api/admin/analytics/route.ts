@@ -206,13 +206,19 @@ export async function GET(req: Request) {
     const returningVisitors = currentReturningVisitorIds.size;
     const newVisitors = Math.max(0, totalVisitors - returningVisitors);
 
-    // visitorsNotJoined = max(0, totalVisitors - distinct visitorIds among submissions created in range)
-    const visitorsNotJoined = Math.max(0, totalVisitors - waitlistVisitorIds.size);
+    // visitorsNotJoined = max(0, totalVisitors - distinct visitorIds in current period who joined)
+    let joinedCount = 0;
+    currentVisitorIds.forEach((vid) => {
+      if (waitlistVisitorIds.has(vid)) {
+        joinedCount++;
+      }
+    });
+    const visitorsNotJoined = Math.max(0, totalVisitors - joinedCount);
     const visitorsNotJoinedPercent = totalVisitors > 0 ? Math.round((visitorsNotJoined / totalVisitors) * 100) : 0;
 
-    // Helper for percentage change
-    const calcDelta = (current: number, prev: number) => {
-      if (prev === 0) return current > 0 ? 100 : 0;
+    // Helper for percentage change: return null when previous period is 0
+    const calcDelta = (current: number, prev: number): number | null => {
+      if (prev === 0) return null;
       return Math.round(((current - prev) / prev) * 100);
     };
 
